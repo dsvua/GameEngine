@@ -1753,6 +1753,12 @@
 },
 {
   "directory": "/home/serhiy/Projects/GameEngine/build",
+  "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/SceneCache.cpp.o -c /home/serhiy/Projects/GameEngine/src/SceneCache.cpp",
+  "file": "/home/serhiy/Projects/GameEngine/src/SceneCache.cpp",
+  "output": "src/CMakeFiles/GameEngine.dir/SceneCache.cpp.o"
+},
+{
+  "directory": "/home/serhiy/Projects/GameEngine/build",
   "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/Engine.cpp.o -c /home/serhiy/Projects/GameEngine/src/Engine.cpp",
   "file": "/home/serhiy/Projects/GameEngine/src/Engine.cpp",
   "output": "src/CMakeFiles/GameEngine.dir/Engine.cpp.o"
@@ -1762,6 +1768,24 @@
   "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/main.cpp.o -c /home/serhiy/Projects/GameEngine/src/main.cpp",
   "file": "/home/serhiy/Projects/GameEngine/src/main.cpp",
   "output": "src/CMakeFiles/GameEngine.dir/main.cpp.o"
+},
+{
+  "directory": "/home/serhiy/Projects/GameEngine/build",
+  "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/Core/JsonDataLoader.cpp.o -c /home/serhiy/Projects/GameEngine/src/Core/JsonDataLoader.cpp",
+  "file": "/home/serhiy/Projects/GameEngine/src/Core/JsonDataLoader.cpp",
+  "output": "src/CMakeFiles/GameEngine.dir/Core/JsonDataLoader.cpp.o"
+},
+{
+  "directory": "/home/serhiy/Projects/GameEngine/build",
+  "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/Core/JsonFile.cpp.o -c /home/serhiy/Projects/GameEngine/src/Core/JsonFile.cpp",
+  "file": "/home/serhiy/Projects/GameEngine/src/Core/JsonFile.cpp",
+  "output": "src/CMakeFiles/GameEngine.dir/Core/JsonFile.cpp.o"
+},
+{
+  "directory": "/home/serhiy/Projects/GameEngine/build",
+  "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/Core/JsonMath.cpp.o -c /home/serhiy/Projects/GameEngine/src/Core/JsonMath.cpp",
+  "file": "/home/serhiy/Projects/GameEngine/src/Core/JsonMath.cpp",
+  "output": "src/CMakeFiles/GameEngine.dir/Core/JsonMath.cpp.o"
 },
 {
   "directory": "/home/serhiy/Projects/GameEngine/build",
@@ -1888,6 +1912,18 @@
   "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/Renderer/Scene.cpp.o -c /home/serhiy/Projects/GameEngine/src/Renderer/Scene.cpp",
   "file": "/home/serhiy/Projects/GameEngine/src/Renderer/Scene.cpp",
   "output": "src/CMakeFiles/GameEngine.dir/Renderer/Scene.cpp.o"
+},
+{
+  "directory": "/home/serhiy/Projects/GameEngine/build",
+  "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimation.cpp.o -c /home/serhiy/Projects/GameEngine/src/Renderer/SkeletalAnimation.cpp",
+  "file": "/home/serhiy/Projects/GameEngine/src/Renderer/SkeletalAnimation.cpp",
+  "output": "src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimation.cpp.o"
+},
+{
+  "directory": "/home/serhiy/Projects/GameEngine/build",
+  "command": "/usr/bin/g++ -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000 -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public -g -std=gnu++23 -o src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimationCache.cpp.o -c /home/serhiy/Projects/GameEngine/src/Renderer/SkeletalAnimationCache.cpp",
+  "file": "/home/serhiy/Projects/GameEngine/src/Renderer/SkeletalAnimationCache.cpp",
+  "output": "src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimationCache.cpp.o"
 },
 {
   "directory": "/home/serhiy/Projects/GameEngine/build",

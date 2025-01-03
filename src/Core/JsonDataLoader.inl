@@ -1,6 +1,6 @@
 #include <stdexcept>
 
-#include <fmt/format.h>
+#include <format>
 
 template<typename T>
 void JsonDataLoader::getIfExists(const std::string& valueName, T& obj) const
@@ -32,7 +32,7 @@ void JsonDataLoader::get_impl(const std::string& valueName, T& obj, const T* def
             obj = it.value().get<T>();
         } catch (const std::exception& e) {
             throw std::runtime_error(
-                fmt::format("can't get field '{}' from '{}': {}", valueName, name, e.what()));
+                std::format("can't get field '{}' from '{}': {}", valueName, name, e.what()));
         }
     } else { // the key is missing
         if (overrideMode) {
@@ -40,7 +40,7 @@ void JsonDataLoader::get_impl(const std::string& valueName, T& obj, const T* def
         }
 
         if (!defaultValuePtr) { // default value wasn't provided
-            throw std::runtime_error(fmt::format(
+            throw std::runtime_error(std::format(
                 "can't get field '{}' from '{}': the key doesn't "
                 "exist and no default value was provided",
                 valueName,

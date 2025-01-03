@@ -2,8 +2,13 @@
 
 ADD_EXECUTABLE(${PROJECT_NAME} 
 
+SceneCache.cpp
 Engine.cpp
 main.cpp
+
+Core/JsonDataLoader.cpp
+Core/JsonFile.cpp
+Core/JsonMath.cpp
 
 #Math
 Math/IndexRange2.cpp
@@ -30,6 +35,10 @@ Renderer/MaterialCache.cpp
 Renderer/MipMapGeneration.cpp
 Renderer/NBuffer.cpp
 Renderer/Scene.cpp
+Renderer/SkeletalAnimation.cpp
+Renderer/SkeletalAnimationCache.cpp
+# Renderer/
+# Renderer/
 
 Utils/GltfLoader.cpp
 )

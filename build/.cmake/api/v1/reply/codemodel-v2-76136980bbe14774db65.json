@@ -1,0 +1,419 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						13
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "external",
+					"childIndexes" : 
+					[
+						2,
+						3,
+						4,
+						5,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-external-Debug-8482bb5b6989bf536f1d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "external"
+				},
+				{
+					"build" : "external/SDL",
+					"jsonFile" : "directory-external.SDL-Debug-f1c58124a50cb023f233.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "external/SDL",
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						6
+					]
+				},
+				{
+					"build" : "external/libfork",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-external.libfork-Debug-4f0b192278e12245125d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "external/libfork"
+				},
+				{
+					"build" : "external/vk-bootstrap",
+					"jsonFile" : "directory-external.vk-bootstrap-Debug-5e5e7067815806598b45.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 3,
+					"source" : "external/vk-bootstrap",
+					"targetIndexes" : 
+					[
+						7
+					]
+				},
+				{
+					"build" : "external/glm",
+					"childIndexes" : 
+					[
+						6
+					],
+					"jsonFile" : "directory-external.glm-Debug-a6dc993d5209625b6587.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 4,
+					"source" : "external/glm"
+				},
+				{
+					"build" : "external/glm/glm",
+					"jsonFile" : "directory-external.glm.glm-Debug-32a2ad45a04345e60681.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 4,
+					"source" : "external/glm/glm",
+					"targetIndexes" : 
+					[
+						5
+					]
+				},
+				{
+					"build" : "external/vma",
+					"jsonFile" : "directory-external.vma-Debug-ba89163564dd79d89cd5.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 5,
+					"source" : "external/vma"
+				},
+				{
+					"build" : "external/tracy",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-external.tracy-Debug-0f330f7246129967d26a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 6,
+					"source" : "external/tracy",
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"build" : "external/volk",
+					"jsonFile" : "directory-external.volk-Debug-64d1bd34ef75aa775217.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.5"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 7,
+					"source" : "external/volk",
+					"targetIndexes" : 
+					[
+						8
+					]
+				},
+				{
+					"build" : "external/stb",
+					"jsonFile" : "directory-external.stb-Debug-3a45b2b4c02dd1217348.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "external/stb"
+				},
+				{
+					"build" : "external/json",
+					"jsonFile" : "directory-external.json-Debug-ed0a4d0ef03ef8f8c8d3.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.1"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 8,
+					"source" : "external/json"
+				},
+				{
+					"build" : "external/tinygltf",
+					"jsonFile" : "directory-external.tinygltf-Debug-cdf9e2a523dacc71ee19.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 9,
+					"source" : "external/tinygltf"
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-Debug-b6cf2213fc5053b67c22.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.14"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						10,
+						13
+					],
+					"name" : "GameEngine",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "SDL3",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						6
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3
+					],
+					"name" : "libfork",
+					"parentIndex" : 0
+				},
+				{
+					"directoryIndexes" : 
+					[
+						4
+					],
+					"name" : "VulkanBootstrap",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						7
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						5,
+						6
+					],
+					"name" : "glm",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						5
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						7
+					],
+					"name" : "VMA",
+					"parentIndex" : 0
+				},
+				{
+					"directoryIndexes" : 
+					[
+						8
+					],
+					"name" : "Tracy",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						9
+					],
+					"name" : "volk",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						8
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						11
+					],
+					"name" : "nlohmann_json",
+					"parentIndex" : 0
+				},
+				{
+					"directoryIndexes" : 
+					[
+						12
+					],
+					"name" : "tinygltf",
+					"parentIndex" : 0
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 13,
+					"id" : "GameEngine::@145eef247bfb46b6828c",
+					"jsonFile" : "target-GameEngine-Debug-e15677bb07bddf97b445.json",
+					"name" : "GameEngine",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "SDL3-shared::@325f9cd2ad4d12a63863",
+					"jsonFile" : "target-SDL3-shared-Debug-17b40054366b0defee2e.json",
+					"name" : "SDL3-shared",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "SDL3_test::@325f9cd2ad4d12a63863",
+					"jsonFile" : "target-SDL3_test-Debug-948e442a16f6f3b10310.json",
+					"name" : "SDL3_test",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "SDL_uclibc::@325f9cd2ad4d12a63863",
+					"jsonFile" : "target-SDL_uclibc-Debug-2c3716ff8611031c2aa2.json",
+					"name" : "SDL_uclibc",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 8,
+					"id" : "TracyClient::@2e71468befdb56f756ab",
+					"jsonFile" : "target-TracyClient-Debug-4422ab98ac6f6383f15b.json",
+					"name" : "TracyClient",
+					"projectIndex" : 6
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "glm::@d090a432591bc19a3a56",
+					"jsonFile" : "target-glm-Debug-985ab3354890b5b29845.json",
+					"name" : "glm",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "uninstall::@325f9cd2ad4d12a63863",
+					"jsonFile" : "target-uninstall-Debug-99830e3508a9c615bca5.json",
+					"name" : "uninstall",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "vk-bootstrap::@73522d34ec096fa0126b",
+					"jsonFile" : "target-vk-bootstrap-Debug-ab0510b65091768fe624.json",
+					"name" : "vk-bootstrap",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 9,
+					"id" : "volk::@a4890d5e87fd2d86fc57",
+					"jsonFile" : "target-volk-Debug-f87d4adbbc52c7be5c17.json",
+					"name" : "volk",
+					"projectIndex" : 7
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/serhiy/Projects/GameEngine/build",
+		"source" : "/home/serhiy/Projects/GameEngine"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}

@@ -3860,6 +3860,14 @@ build external/tinygltf/install/strip: phony external/tinygltf/CMakeFiles/instal
 
 build cmake_object_order_depends_target_GameEngine: phony || cmake_object_order_depends_target_SDL3-shared cmake_object_order_depends_target_TracyClient cmake_object_order_depends_target_glm cmake_object_order_depends_target_vk-bootstrap cmake_object_order_depends_target_volk
 
+build src/CMakeFiles/GameEngine.dir/SceneCache.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/SceneCache.cpp || cmake_object_order_depends_target_GameEngine
+  DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
+  DEP_FILE = src/CMakeFiles/GameEngine.dir/SceneCache.cpp.o.d
+  FLAGS = -g -std=gnu++23
+  INCLUDES = -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public
+  OBJECT_DIR = src/CMakeFiles/GameEngine.dir
+  OBJECT_FILE_DIR = src/CMakeFiles/GameEngine.dir
+
 build src/CMakeFiles/GameEngine.dir/Engine.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/Engine.cpp || cmake_object_order_depends_target_GameEngine
   DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
   DEP_FILE = src/CMakeFiles/GameEngine.dir/Engine.cpp.o.d
@@ -3875,6 +3883,30 @@ build src/CMakeFiles/GameEngine.dir/main.cpp.o: CXX_COMPILER__GameEngine_unscann
   INCLUDES = -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public
   OBJECT_DIR = src/CMakeFiles/GameEngine.dir
   OBJECT_FILE_DIR = src/CMakeFiles/GameEngine.dir
+
+build src/CMakeFiles/GameEngine.dir/Core/JsonDataLoader.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/Core/JsonDataLoader.cpp || cmake_object_order_depends_target_GameEngine
+  DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
+  DEP_FILE = src/CMakeFiles/GameEngine.dir/Core/JsonDataLoader.cpp.o.d
+  FLAGS = -g -std=gnu++23
+  INCLUDES = -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public
+  OBJECT_DIR = src/CMakeFiles/GameEngine.dir
+  OBJECT_FILE_DIR = src/CMakeFiles/GameEngine.dir/Core
+
+build src/CMakeFiles/GameEngine.dir/Core/JsonFile.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/Core/JsonFile.cpp || cmake_object_order_depends_target_GameEngine
+  DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
+  DEP_FILE = src/CMakeFiles/GameEngine.dir/Core/JsonFile.cpp.o.d
+  FLAGS = -g -std=gnu++23
+  INCLUDES = -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public
+  OBJECT_DIR = src/CMakeFiles/GameEngine.dir
+  OBJECT_FILE_DIR = src/CMakeFiles/GameEngine.dir/Core
+
+build src/CMakeFiles/GameEngine.dir/Core/JsonMath.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/Core/JsonMath.cpp || cmake_object_order_depends_target_GameEngine
+  DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
+  DEP_FILE = src/CMakeFiles/GameEngine.dir/Core/JsonMath.cpp.o.d
+  FLAGS = -g -std=gnu++23
+  INCLUDES = -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public
+  OBJECT_DIR = src/CMakeFiles/GameEngine.dir
+  OBJECT_FILE_DIR = src/CMakeFiles/GameEngine.dir/Core
 
 build src/CMakeFiles/GameEngine.dir/Math/IndexRange2.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/Math/IndexRange2.cpp || cmake_object_order_depends_target_GameEngine
   DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
@@ -4044,6 +4076,22 @@ build src/CMakeFiles/GameEngine.dir/Renderer/Scene.cpp.o: CXX_COMPILER__GameEngi
   OBJECT_DIR = src/CMakeFiles/GameEngine.dir
   OBJECT_FILE_DIR = src/CMakeFiles/GameEngine.dir/Renderer
 
+build src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimation.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/Renderer/SkeletalAnimation.cpp || cmake_object_order_depends_target_GameEngine
+  DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
+  DEP_FILE = src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimation.cpp.o.d
+  FLAGS = -g -std=gnu++23
+  INCLUDES = -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public
+  OBJECT_DIR = src/CMakeFiles/GameEngine.dir
+  OBJECT_FILE_DIR = src/CMakeFiles/GameEngine.dir/Renderer
+
+build src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimationCache.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/Renderer/SkeletalAnimationCache.cpp || cmake_object_order_depends_target_GameEngine
+  DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
+  DEP_FILE = src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimationCache.cpp.o.d
+  FLAGS = -g -std=gnu++23
+  INCLUDES = -I/home/serhiy/Projects/GameEngine/external/json/include -I/home/serhiy/Projects/GameEngine/external/volk -I/home/serhiy/Projects/GameEngine/build/external/SDL/include-revision -I/home/serhiy/Projects/GameEngine/external/SDL/include -I/home/serhiy/Projects/GameEngine/external/glm -I/home/serhiy/Projects/GameEngine/external/vk-bootstrap/src -I/home/serhiy/Projects/GameEngine/external/tinygltf -I/home/serhiy/Projects/GameEngine/external/stb/include -isystem /home/serhiy/Projects/GameEngine/external/libfork/include -isystem /home/serhiy/Projects/GameEngine/external/tracy/public
+  OBJECT_DIR = src/CMakeFiles/GameEngine.dir
+  OBJECT_FILE_DIR = src/CMakeFiles/GameEngine.dir/Renderer
+
 build src/CMakeFiles/GameEngine.dir/Utils/GltfLoader.cpp.o: CXX_COMPILER__GameEngine_unscanned_Debug /home/serhiy/Projects/GameEngine/src/Utils/GltfLoader.cpp || cmake_object_order_depends_target_GameEngine
   DEFINES = -DTRACY_DELAYED_INIT -DTRACY_ENABLE -DVK_NO_PROTOTYPES -DVMA_VULKAN_VERSION=1003000
   DEP_FILE = src/CMakeFiles/GameEngine.dir/Utils/GltfLoader.cpp.o.d
@@ -4060,7 +4108,7 @@ build src/CMakeFiles/GameEngine.dir/Utils/GltfLoader.cpp.o: CXX_COMPILER__GameEn
 #############################################
 # Link the executable src/GameEngine
 
-build src/GameEngine: CXX_EXECUTABLE_LINKER__GameEngine_Debug src/CMakeFiles/GameEngine.dir/Engine.cpp.o src/CMakeFiles/GameEngine.dir/main.cpp.o src/CMakeFiles/GameEngine.dir/Math/IndexRange2.cpp.o src/CMakeFiles/GameEngine.dir/Math/Transform.cpp.o src/CMakeFiles/GameEngine.dir/Math/Util.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/VolkImpl.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/BindlessSetManager.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Descriptors.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Init.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Pipelines.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Swapchain.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Util.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/VmaImpl.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/VulkanImmediateExecutor.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/ImageLoader.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Color.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/GfxDevice.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/ImageCache.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/MeshCache.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/MaterialCache.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/MipMapGeneration.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/NBuffer.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Scene.cpp.o src/CMakeFiles/GameEngine.dir/Utils/GltfLoader.cpp.o | external/volk/libvolk.a external/SDL/libSDL3.so.0.1.7 external/glm/glm/libglm.a external/tracy/libTracyClient.a external/vk-bootstrap/libvk-bootstrap.a /home/serhiy/Projects/GameEngine/external/SDL/src/dynapi/SDL_dynapi.sym || external/SDL/libSDL3.so external/glm/glm/libglm.a external/tracy/libTracyClient.a external/vk-bootstrap/libvk-bootstrap.a external/volk/libvolk.a external/SDL/libSDL3.so
+build src/GameEngine: CXX_EXECUTABLE_LINKER__GameEngine_Debug src/CMakeFiles/GameEngine.dir/SceneCache.cpp.o src/CMakeFiles/GameEngine.dir/Engine.cpp.o src/CMakeFiles/GameEngine.dir/main.cpp.o src/CMakeFiles/GameEngine.dir/Core/JsonDataLoader.cpp.o src/CMakeFiles/GameEngine.dir/Core/JsonFile.cpp.o src/CMakeFiles/GameEngine.dir/Core/JsonMath.cpp.o src/CMakeFiles/GameEngine.dir/Math/IndexRange2.cpp.o src/CMakeFiles/GameEngine.dir/Math/Transform.cpp.o src/CMakeFiles/GameEngine.dir/Math/Util.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/VolkImpl.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/BindlessSetManager.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Descriptors.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Init.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Pipelines.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Swapchain.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/Util.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/VmaImpl.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Vulkan/VulkanImmediateExecutor.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/ImageLoader.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Color.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/GfxDevice.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/ImageCache.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/MeshCache.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/MaterialCache.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/MipMapGeneration.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/NBuffer.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/Scene.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimation.cpp.o src/CMakeFiles/GameEngine.dir/Renderer/SkeletalAnimationCache.cpp.o src/CMakeFiles/GameEngine.dir/Utils/GltfLoader.cpp.o | external/volk/libvolk.a external/SDL/libSDL3.so.0.1.7 external/glm/glm/libglm.a external/tracy/libTracyClient.a external/vk-bootstrap/libvk-bootstrap.a /home/serhiy/Projects/GameEngine/external/SDL/src/dynapi/SDL_dynapi.sym || external/SDL/libSDL3.so external/glm/glm/libglm.a external/tracy/libTracyClient.a external/vk-bootstrap/libvk-bootstrap.a external/volk/libvolk.a external/SDL/libSDL3.so
   FLAGS = -g
   LINK_LIBRARIES = -Wl,-rpath,/home/serhiy/Projects/GameEngine/build/external/SDL  external/volk/libvolk.a  external/SDL/libSDL3.so.0.1.7  external/glm/glm/libglm.a  external/tracy/libTracyClient.a  external/vk-bootstrap/libvk-bootstrap.a  -ldl
   OBJECT_DIR = src/CMakeFiles/GameEngine.dir
