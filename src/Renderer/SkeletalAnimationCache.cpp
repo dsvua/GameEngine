@@ -7,7 +7,7 @@ void SkeletalAnimationCache::loadAnimationData(const std::filesystem::path& path
     JsonFile file(path);
     if (!file.isGood()) {
         throw std::runtime_error(
-            fmt::format("failed to load animation data from {}", path.string()));
+            std::format("failed to load animation data from {}", path.string()));
     }
     const auto loader = file.getLoader();
 

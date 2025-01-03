@@ -1,4 +1,4 @@
-#include SkeletalAnimation.hpp
+#include "SkeletalAnimation.hpp"
 
 const std::vector<std::string>& SkeletalAnimation::getEventsForFrame(int frame) const
 {
