@@ -1,0 +1,173 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"external/tracy/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 173,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 183,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 185,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 187,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 189,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 197,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "lib",
+			"destination" : "lib",
+			"paths" : 
+			[
+				"external/tracy/libTracyClient.a"
+			],
+			"targetId" : "TracyClient::@2e71468befdb56f756ab",
+			"targetIndex" : 4,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "Unspecified",
+			"destination" : "include/tracy",
+			"paths" : 
+			[
+				"external/tracy/public/tracy/TracyC.h",
+				"external/tracy/public/tracy/Tracy.hpp",
+				"external/tracy/public/tracy/TracyD3D11.hpp",
+				"external/tracy/public/tracy/TracyD3D12.hpp",
+				"external/tracy/public/tracy/TracyLua.hpp",
+				"external/tracy/public/tracy/TracyOpenCL.hpp",
+				"external/tracy/public/tracy/TracyOpenGL.hpp",
+				"external/tracy/public/tracy/TracyVulkan.hpp"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "Unspecified",
+			"destination" : "include/tracy/client",
+			"paths" : 
+			[
+				"external/tracy/public/client/tracy_concurrentqueue.h",
+				"external/tracy/public/client/tracy_rpmalloc.hpp",
+				"external/tracy/public/client/tracy_SPSCQueue.h",
+				"external/tracy/public/client/TracyKCore.hpp",
+				"external/tracy/public/client/TracyArmCpuTable.hpp",
+				"external/tracy/public/client/TracyCallstack.h",
+				"external/tracy/public/client/TracyCallstack.hpp",
+				"external/tracy/public/client/TracyCpuid.hpp",
+				"external/tracy/public/client/TracyDebug.hpp",
+				"external/tracy/public/client/TracyDxt1.hpp",
+				"external/tracy/public/client/TracyFastVector.hpp",
+				"external/tracy/public/client/TracyLock.hpp",
+				"external/tracy/public/client/TracyProfiler.hpp",
+				"external/tracy/public/client/TracyRingBuffer.hpp",
+				"external/tracy/public/client/TracyScoped.hpp",
+				"external/tracy/public/client/TracyStringHelpers.hpp",
+				"external/tracy/public/client/TracySysPower.hpp",
+				"external/tracy/public/client/TracySysTime.hpp",
+				"external/tracy/public/client/TracySysTrace.hpp",
+				"external/tracy/public/client/TracyThread.hpp"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 4,
+			"component" : "Unspecified",
+			"destination" : "include/tracy/common",
+			"paths" : 
+			[
+				"external/tracy/public/common/tracy_lz4.hpp",
+				"external/tracy/public/common/tracy_lz4hc.hpp",
+				"external/tracy/public/common/TracyAlign.hpp",
+				"external/tracy/public/common/TracyAlloc.hpp",
+				"external/tracy/public/common/TracyApi.h",
+				"external/tracy/public/common/TracyColor.hpp",
+				"external/tracy/public/common/TracyForceInline.hpp",
+				"external/tracy/public/common/TracyMutex.hpp",
+				"external/tracy/public/common/TracyProtocol.hpp",
+				"external/tracy/public/common/TracyQueue.hpp",
+				"external/tracy/public/common/TracySocket.hpp",
+				"external/tracy/public/common/TracyStackFrames.hpp",
+				"external/tracy/public/common/TracySystem.hpp",
+				"external/tracy/public/common/TracyUwp.hpp",
+				"external/tracy/public/common/TracyYield.hpp"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 5,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/Tracy",
+			"exportName" : "TracyConfig",
+			"exportTargets" : 
+			[
+				{
+					"id" : "TracyClient::@2e71468befdb56f756ab",
+					"index" : 4
+				}
+			],
+			"paths" : 
+			[
+				"external/tracy/CMakeFiles/Export/b11871b887d9a65b4500cc2803d48638/TracyTargets.cmake"
+			],
+			"type" : "export"
+		},
+		{
+			"backtrace" : 6,
+			"component" : "Unspecified",
+			"destination" : "lib/cmake/Tracy",
+			"paths" : 
+			[
+				"build/external/tracy/TracyConfig.cmake"
+			],
+			"type" : "file"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "external/tracy",
+		"source" : "external/tracy"
+	}
+}

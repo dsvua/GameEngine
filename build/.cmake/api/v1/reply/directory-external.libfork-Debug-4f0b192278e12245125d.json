@@ -1,0 +1,114 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install",
+			"include"
+		],
+		"files" : 
+		[
+			"external/libfork/cmake/install-rules.cmake",
+			"external/libfork/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 105,
+				"parent" : 0
+			},
+			{
+				"file" : 0,
+				"parent" : 1
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 19,
+				"parent" : 2
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 52,
+				"parent" : 2
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 58,
+				"parent" : 2
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 65,
+				"parent" : 2
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 3,
+			"component" : "libfork_Development",
+			"destination" : "include",
+			"paths" : 
+			[
+				{
+					"from" : "external/libfork/include",
+					"to" : "."
+				}
+			],
+			"type" : "directory"
+		},
+		{
+			"backtrace" : 4,
+			"component" : "libfork_Development",
+			"destination" : "share/libfork",
+			"paths" : 
+			[
+				"build/external/libfork/libforkConfig.cmake"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 5,
+			"component" : "libfork_Development",
+			"destination" : "share/libfork",
+			"paths" : 
+			[
+				"build/external/libfork/libforkConfigVersion.cmake"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 6,
+			"component" : "libfork_Development",
+			"destination" : "share/libfork",
+			"exportName" : "libforkTargets",
+			"exportTargets" : 
+			[
+				{
+					"id" : "libfork_libfork::@26b5e07a0d29ea329d19",
+					"index" : 0
+				}
+			],
+			"paths" : 
+			[
+				"external/libfork/CMakeFiles/Export/b40cdb14707d8521985c1faf5df8446d/libforkTargets.cmake"
+			],
+			"type" : "export"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "external/libfork",
+		"source" : "external/libfork"
+	}
+}

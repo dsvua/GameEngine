@@ -1,0 +1,1 @@
+/usr/bin/g++ -g CMakeFiles/GameEngine.dir/main.cpp.o -o GameEngine  -Wl,-rpath,/home/serhiy/Projects/GameEngine/build/external/SDL ../external/SDL/libSDL3.so.0.1.7 ../external/vk-bootstrap/libvk-bootstrap.a -ldl 
