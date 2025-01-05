@@ -8,7 +8,7 @@ add_subdirectory(vma)
 add_subdirectory(tracy)
 add_subdirectory(volk)
 add_subdirectory(stb)
-# add_subdirectory(libfork)
+add_subdirectory(meshoptimizer)
 # add_subdirectory(libfork)
 
 ## json

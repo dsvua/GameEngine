@@ -2,7 +2,7 @@
 
 ADD_EXECUTABLE(${PROJECT_NAME} 
 
-SceneCache.cpp
+# SceneCache.cpp
 Engine.cpp
 main.cpp
 
@@ -30,20 +30,17 @@ Renderer/ImageLoader.cpp
 Renderer/Color.cpp
 Renderer/GfxDevice.cpp
 Renderer/ImageCache.cpp
-Renderer/MeshCache.cpp
 Renderer/MaterialCache.cpp
 Renderer/MipMapGeneration.cpp
 Renderer/NBuffer.cpp
-Renderer/Scene.cpp
-Renderer/SkeletalAnimation.cpp
-Renderer/SkeletalAnimationCache.cpp
+# Renderer/Scene.cpp
 # Renderer/
 # Renderer/
 
 Utils/GltfLoader.cpp
 )
 
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 target_link_libraries(${PROJECT_NAME} 
   PUBLIC 
@@ -58,6 +55,7 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE
     tinygltf::tinygltf
     stb::image
+    meshoptimizer
 )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -66,6 +64,7 @@ target_compile_definitions(${PROJECT_NAME}
     VMA_VULKAN_VERSION=1003000
 )
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/external/cgltf)
 
 if (MSVC)
   target_compile_definitions(TracyClient PUBLIC

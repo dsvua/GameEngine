@@ -13,7 +13,7 @@ ImageData::~ImageData()
 
 namespace util
 {
-ImageData loadImage(const std::filesystem::path& p)
+ImageData loadSTBImage(const std::filesystem::path& p)
 {
     ImageData data;
     data.shouldSTBFree = true;
