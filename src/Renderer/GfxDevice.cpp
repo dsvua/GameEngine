@@ -28,6 +28,26 @@ namespace
 static constexpr auto NO_TIMEOUT = std::numeric_limits<std::uint64_t>::max();
 }
 
+VkFormat GfxDevice::getSwapchainFormat()
+{
+	uint32_t formatCount = 0;
+	VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, 0));
+	assert(formatCount > 0);
+
+	std::vector<VkSurfaceFormatKHR> formats(formatCount);
+	VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, formats.data()));
+
+	if (formatCount == 1 && formats[0].format == VK_FORMAT_UNDEFINED)
+		return VK_FORMAT_R8G8B8A8_UNORM;
+
+	for (uint32_t i = 0; i < formatCount; ++i)
+		if (formats[i].format == VK_FORMAT_R8G8B8A8_UNORM || formats[i].format == VK_FORMAT_B8G8R8A8_UNORM)
+			return formats[i].format;
+
+	return formats[0].format;
+}
+
+
 GfxDevice::GfxDevice() : imageCache(*this)
 {}
 
@@ -42,7 +62,7 @@ void GfxDevice::init(SDL_Window* window, const char* appName, const Version& ver
 
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
-    swapchainFormat = VK_FORMAT_B8G8R8A8_SRGB;
+    swapchainFormat = getSwapchainFormat();
     swapchain.create(device, swapchainFormat, (std::uint32_t)w, (std::uint32_t)h, vSync);
 
     createCommandBuffers();
@@ -304,8 +324,7 @@ VkCommandBuffer GfxDevice::beginFrame()
 void GfxDevice::endFrame(VkCommandBuffer cmd, const GPUImage& drawImage, const EndFrameProps& props)
 {
     // get swapchain image
-    const auto [swapchainImage, swapchainImageIndex] =
-        swapchain.acquireImage(device, getCurrentFrameIndex());
+    const auto [swapchainImage, swapchainImageIndex] = swapchain.acquireImage(device, getCurrentFrameIndex());
     if (swapchainImage == VK_NULL_HANDLE) {
         return;
     }

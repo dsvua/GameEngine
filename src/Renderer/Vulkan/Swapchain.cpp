@@ -39,7 +39,7 @@ void Swapchain::create(
     std::uint32_t height,
     bool vSync)
 {
-    assert(swapchainFormat == VK_FORMAT_B8G8R8A8_SRGB && "TODO: test other formats");
+    // assert(swapchainFormat == VK_FORMAT_B8G8R8A8_SRGB && "TODO: test other formats");
     // vSync = false;
 
     auto res = vkb::SwapchainBuilder{device}
@@ -76,7 +76,7 @@ void Swapchain::recreate(
 {
     assert(swapchain);
 
-    assert(swapchainFormat == VK_FORMAT_B8G8R8A8_SRGB && "TODO: test other formats");
+    // assert(swapchainFormat == VK_FORMAT_B8G8R8A8_SRGB && "TODO: test other formats");
     auto res = vkb::SwapchainBuilder{device}
                    .set_old_swapchain(swapchain)
                    .set_desired_format(VkSurfaceFormatKHR{

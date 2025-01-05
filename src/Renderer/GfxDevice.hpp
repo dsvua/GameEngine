@@ -132,7 +132,7 @@ public:
 
 public:
     VkDevice getDevice() const { return device; }
-
+    VkFormat getSwapchainFormat();
     std::uint32_t getCurrentFrameIndex() const;
 
     VkExtent2D getSwapchainExtent() const { return swapchain.getExtent(); }

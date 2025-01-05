@@ -3,7 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include "../Common.hpp"
+#include "../Renderer/Common.hpp"
 #include <stdio.h>
 #include <memory>
 

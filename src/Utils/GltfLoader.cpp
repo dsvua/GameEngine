@@ -1,6 +1,6 @@
 #include "GltfLoader.hpp"
-#include "../Config.hpp"
-#include "../Common.hpp"
+#include "../Renderer/Config.hpp"
+#include "../Renderer/Common.hpp"
 
 #define CGLTF_IMPLEMENTATION
 #include <cgltf.h>
