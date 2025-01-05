@@ -1,75 +1,123 @@
 #pragma once
 
-#include <span>
-#include <vector>
+#include <string>
 
-// #include <volk.h>
-#include <vulkan/vulkan.h>
-
-namespace vkutil
+struct Shader
 {
-VkShaderModule loadShaderModule(const char* filePath, VkDevice device);
-VkPipelineLayout createPipelineLayout(
-    VkDevice device,
-    std::span<const VkDescriptorSetLayout> layouts = {},
-    std::span<const VkPushConstantRange> pushContantRanges = {});
-} // end of namespace vkutil
+	std::string name;
 
-class PipelineBuilder {
-public:
-    PipelineBuilder(VkPipelineLayout pipelineLayout);
-    VkPipeline build(VkDevice device);
+	std::vector<char> spirv;
+	VkShaderModule module;
+	VkShaderStageFlagBits stage;
 
-    PipelineBuilder& setShaders(VkShaderModule vertexShader, VkShaderModule fragmentShader);
-    PipelineBuilder& setShaders(
-        VkShaderModule vertexShader,
-        VkShaderModule geometryShader,
-        VkShaderModule fragmentShader);
-    PipelineBuilder& setInputTopology(VkPrimitiveTopology topology);
-    PipelineBuilder& setPolygonMode(VkPolygonMode mode);
-    PipelineBuilder& setCullMode(VkCullModeFlags cullMode, VkFrontFace frontFace);
-    PipelineBuilder& enableCulling(); // defaults for culling
-    PipelineBuilder& disableCulling();
-    PipelineBuilder& setMultisamplingNone();
-    PipelineBuilder& setMultisampling(VkSampleCountFlagBits samples);
-    PipelineBuilder& disableBlending();
-    PipelineBuilder& enableBlending(
-        VkBlendOp blendOp = VK_BLEND_OP_ADD,
-        VkBlendFactor srcBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA,
-        VkBlendFactor dstBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
-        VkBlendFactor srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
-        VkBlendFactor dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-    PipelineBuilder& setColorAttachmentFormat(VkFormat format);
-    PipelineBuilder& setDepthFormat(VkFormat format);
-    PipelineBuilder& enableDepthTest(bool depthWriteEnable, VkCompareOp op);
-    PipelineBuilder& enableDepthClamp();
-    PipelineBuilder& disableDepthTest();
-    PipelineBuilder& enableDynamicDepth();
-    PipelineBuilder& enableDepthBias(float constantFactor, float slopeFactor);
+	VkDescriptorType resourceTypes[32];
+	uint32_t resourceMask;
 
-private:
-    void clear();
+	uint32_t localSizeX;
+	uint32_t localSizeY;
+	uint32_t localSizeZ;
 
-    std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly;
-    VkPipelineRasterizationStateCreateInfo rasterizer;
-    VkPipelineColorBlendAttachmentState colorBlendAttachment;
-    VkPipelineMultisampleStateCreateInfo multisampling;
-    VkPipelineDepthStencilStateCreateInfo depthStencil;
-    VkPipelineRenderingCreateInfo renderInfo;
-    VkFormat colorAttachmentformat;
-    VkPipelineLayout pipelineLayout;
-    bool dynamicDepth{false};
+	bool usesPushConstants;
+	bool usesDescriptorArray;
 };
 
-class ComputePipelineBuilder {
-public:
-    ComputePipelineBuilder(VkPipelineLayout pipelineLayout);
-    ComputePipelineBuilder& setShader(VkShaderModule shaderModule);
+struct ShaderSet
+{
+	std::vector<Shader> shaders;
 
-    VkPipeline build(VkDevice device);
+	const Shader& operator[](const char* name) const;
+};
 
-private:
-    VkPipelineLayout pipelineLayout;
-    VkShaderModule shaderModule;
+struct Program
+{
+	VkPipelineBindPoint bindPoint;
+	VkPipelineLayout layout;
+	VkDescriptorSetLayout setLayout;
+	VkDescriptorUpdateTemplate updateTemplate;
+
+	VkShaderStageFlags pushConstantStages;
+	uint32_t pushConstantSize;
+	uint32_t pushDescriptorCount;
+
+	uint32_t localSizeX;
+	uint32_t localSizeY;
+	uint32_t localSizeZ;
+
+	const Shader* shaders[8];
+	size_t shaderCount;
+};
+
+bool loadShader(Shader& shader, VkDevice device, const char* path);
+bool loadShader(Shader& shader, VkDevice device, const char* base, const char* path);
+bool loadShaders(ShaderSet& shaders, VkDevice device, const char* base, const char* path);
+
+using Shaders = std::initializer_list<const Shader*>;
+using Constants = std::initializer_list<int>;
+
+VkPipeline createGraphicsPipeline(VkDevice device, VkPipelineCache pipelineCache, const VkPipelineRenderingCreateInfo& renderingInfo, const Program& program, Constants constants = {});
+VkPipeline createComputePipeline(VkDevice device, VkPipelineCache pipelineCache, const Program& program, Constants constants = {});
+
+Program createProgram(VkDevice device, VkPipelineBindPoint bindPoint, Shaders shaders, size_t pushConstantSize, VkDescriptorSetLayout arrayLayout = nullptr);
+void destroyProgram(VkDevice device, const Program& program);
+
+VkDescriptorSetLayout createDescriptorArrayLayout(VkDevice device);
+std::pair<VkDescriptorPool, VkDescriptorSet> createDescriptorArray(VkDevice device, VkDescriptorSetLayout layout, uint32_t descriptorCount);
+
+inline uint32_t getGroupCount(uint32_t threadCount, uint32_t localSize)
+{
+	return (threadCount + localSize - 1) / localSize;
+}
+
+struct DescriptorInfo
+{
+	union
+	{
+		VkDescriptorImageInfo image;
+		VkDescriptorBufferInfo buffer;
+		VkAccelerationStructureKHR accelerationStructure;
+	};
+
+	DescriptorInfo()
+	{
+	}
+
+	DescriptorInfo(VkAccelerationStructureKHR structure)
+	{
+		accelerationStructure = structure;
+	}
+
+	DescriptorInfo(VkImageView imageView, VkImageLayout imageLayout)
+	{
+		image.sampler = VK_NULL_HANDLE;
+		image.imageView = imageView;
+		image.imageLayout = imageLayout;
+	}
+
+	DescriptorInfo(VkSampler sampler)
+	{
+		image.sampler = sampler;
+		image.imageView = VK_NULL_HANDLE;
+		image.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	}
+
+	DescriptorInfo(VkSampler sampler, VkImageView imageView, VkImageLayout imageLayout)
+	{
+		image.sampler = sampler;
+		image.imageView = imageView;
+		image.imageLayout = imageLayout;
+	}
+
+	DescriptorInfo(VkBuffer buffer_, VkDeviceSize offset, VkDeviceSize range)
+	{
+		buffer.buffer = buffer_;
+		buffer.offset = offset;
+		buffer.range = range;
+	}
+
+	DescriptorInfo(VkBuffer buffer_)
+	{
+		buffer.buffer = buffer_;
+		buffer.offset = 0;
+		buffer.range = VK_WHOLE_SIZE;
+	}
 };
