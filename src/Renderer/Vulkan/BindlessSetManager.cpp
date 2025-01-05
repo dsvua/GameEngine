@@ -8,14 +8,12 @@
 
 namespace
 {
-static const std::uint32_t maxBindlessResources = 16536;
 static const std::uint32_t maxSamplers = 32;
-
 static const std::uint32_t texturesBinding = 0;
 static const std::uint32_t samplersBinding = 1;
 }
 
-void BindlessSetManager::init(VkDevice device, float maxAnisotropy)
+void BindlessSetManager::init(VkDevice device, float maxAnisotropy, std::uint32_t maxBindlessResources)
 {
     { // create pool
         const auto poolSizesBindless = std::array<VkDescriptorPoolSize, 2>{{

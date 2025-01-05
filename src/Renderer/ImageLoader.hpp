@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <vulkan/vulkan.h>
 
 struct ImageData {
     ImageData() = default;
@@ -19,6 +20,7 @@ struct ImageData {
     int width{0};
     int height{0};
     int channels{0};
+    VkFormat format;
 
     // HDR only
     float* hdrPixels{nullptr};

@@ -20,7 +20,9 @@ ImageId ImageCache::loadImageFromFile(
         }
     }
 
+
     auto image = gfxDevice.loadImageFromFileRaw(path, format, usage, mipMap);
+
     if (image.isInitialized() && image.getBindlessId() == errorImageId) {
         return errorImageId;
     }

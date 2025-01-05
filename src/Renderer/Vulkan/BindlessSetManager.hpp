@@ -9,7 +9,7 @@ struct GPUImage;
 
 class BindlessSetManager {
 public:
-    void init(VkDevice device, float maxAnisotropy);
+    void init(VkDevice device, float maxAnisotropy, std::uint32_t maxBindlessResources = 16536);
     void cleanup(VkDevice device);
 
     VkDescriptorSetLayout getDescSetLayout() const { return descSetLayout; }

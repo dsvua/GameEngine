@@ -46,7 +46,7 @@ void GfxDevice::init(SDL_Window* window, const char* appName, const Version& ver
     swapchain.create(device, swapchainFormat, (std::uint32_t)w, (std::uint32_t)h, vSync);
 
     createCommandBuffers();
-    imageCache.bindlessSetManager.init(device, getMaxAnisotropy());
+    imageCache.bindlessSetManager.init(device, getMaxAnisotropy()); // TODO: init when number of images is known
 
     { // create white texture
         std::uint32_t pixel = 0xFFFFFFFF;
@@ -119,7 +119,7 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
 	features11.storageBuffer16BitAccess = true;
 	features11.shaderDrawParameters = true;
 
-    const auto features12 = VkPhysicalDeviceVulkan12Features{
+    auto features12 = VkPhysicalDeviceVulkan12Features{
         .drawIndirectCount = true,
         .storageBuffer8BitAccess = true,
         .uniformAndStorageBuffer8BitAccess = true,
@@ -133,10 +133,22 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
         .runtimeDescriptorArray = true,
         .samplerFilterMinmax = true,
         .scalarBlockLayout = true,
-        .bufferDeviceAddress = true,
     };
 
-    const auto features13 = VkPhysicalDeviceVulkan13Features{
+	// This will only be used if raytracingSupported=true (see below)
+	VkPhysicalDeviceRayQueryFeaturesKHR featuresRayQueries = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR };
+	featuresRayQueries.rayQuery = true;
+
+	// This will only be used if raytracingSupported=true (see below)
+	VkPhysicalDeviceAccelerationStructureFeaturesKHR featuresAccelerationStructure = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR };
+	featuresAccelerationStructure.accelerationStructure = true;
+
+	// This will only be used if meshShadingSupported=true (see below)
+	VkPhysicalDeviceMeshShaderFeaturesEXT featuresMesh = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT };
+	featuresMesh.taskShader = true;
+	featuresMesh.meshShader = true;
+
+    auto features13 = VkPhysicalDeviceVulkan13Features{
         .synchronization2 = true,
         .dynamicRendering = true,
         .maintenance4 = true,
@@ -145,11 +157,41 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
     std::vector<const char*> extensions = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
-        VK_EXT_MESH_SHADER_EXTENSION_NAME,
-        VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
-        VK_KHR_RAY_QUERY_EXTENSION_NAME,
-        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME
 	};
+
+    auto system_info_ret = vkb::SystemInfo::get_system_info();
+
+    if (!system_info_ret) {
+        printf("%s\n", system_info_ret.error().message().c_str());
+        std::exit(1);
+    }
+
+    auto system_info = system_info_ret.value();
+    void** ppNext = &features13.pNext;
+
+    if (system_info.is_extension_available("VK_EXT_MESH_SHADER_EXTENSION_NAME")) {
+        meshShadingSupported = true;
+		extensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+
+        *ppNext = &featuresMesh;
+		ppNext = &featuresMesh.pNext;
+    }
+
+    meshShadingEnabled = meshShadingSupported;
+
+    if (system_info.is_extension_available("VK_KHR_RAY_QUERY_EXTENSION_NAME")) {
+        raytracingSupported = true;
+		extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
+		extensions.push_back(VK_KHR_RAY_QUERY_EXTENSION_NAME);
+		extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+        features12.bufferDeviceAddress = true;
+
+        *ppNext = &featuresRayQueries;
+		ppNext = &featuresRayQueries.pNext;
+
+		*ppNext = &featuresAccelerationStructure;
+		ppNext = &featuresAccelerationStructure.pNext;
+    }
 
     physicalDevice = vkb::PhysicalDeviceSelector{instance}
                          .set_minimum_version(1, 3)
@@ -702,6 +744,10 @@ GPUImage GfxDevice::loadImageFromFileRaw(
         // fmt::println("[error] failed to load image from '{}'", path.string());
         return getImage(errorImageId);
     }
+
+    auto ext = path.extension();
+    if(ext == "dds" || ext == "DDS")
+        format = data.format;
 
     auto image = createImageRaw({
         .format = format,
