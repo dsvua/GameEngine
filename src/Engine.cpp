@@ -55,5 +55,6 @@ Engine::Engine(const Params &ps)
     }
 
     // renderer = new Renderer(window, params.windowSize, vSync);
-
+    gfxDevice.init(window, params.appName.c_str(), params.version, vSync);
+    gameRenderer.init(gfxDevice, params.windowSize);
 }

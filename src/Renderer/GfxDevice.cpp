@@ -107,20 +107,29 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
 {
     VK_CHECK(volkInitialize());
 
-    instance = vkb::InstanceBuilder{}
-                   .set_app_name(appName)
+    vkb::InstanceBuilder instance_builder = vkb::InstanceBuilder{}
+                   .set_app_name("Awesome Vulkan Application")
                    .set_app_version(appVersion.major, appVersion.major, appVersion.patch)
                    .request_validation_layers()
-                   .use_default_debug_messenger()
-                   .require_api_version(1, 3, 0)
-                   .build()
-                   .value();
+                   .require_api_version(1, 3, 0);
 
+    if(vkCreateDebugReportCallbackEXT)
+                instance_builder.use_default_debug_messenger();
+
+    auto instance_builder_return = instance_builder.build();
+
+    if(!instance_builder_return)
+    {
+        std::cerr << "Failed to create Vulkan instance: " << instance_builder_return.error().message() << std::endl;
+        std::exit(1);
+    }
+
+    instance = instance_builder_return.value();
     volkLoadInstance(instance);
 
     auto res = SDL_Vulkan_CreateSurface(window, instance, NULL, &surface);
     if (res != true) {
-        std::cout << "Failed to create Vulkan surface: " << SDL_GetError() << std::endl;
+        std::cerr << "Failed to create Vulkan surface: " << SDL_GetError() << std::endl;
         std::exit(1);
     }
 
@@ -179,17 +188,32 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
 		VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
 	};
 
-    auto system_info_ret = vkb::SystemInfo::get_system_info();
+    auto system_info_ret = vkb::SystemInfo::get_system_info(instance.fp_vkGetInstanceProcAddr);
 
     if (!system_info_ret) {
-        printf("%s\n", system_info_ret.error().message().c_str());
+        printf("system_info_ret %s\n", system_info_ret.error().message().c_str());
         std::exit(1);
     }
 
     auto system_info = system_info_ret.value();
+    
     void** ppNext = &features13.pNext;
 
+    meshShadingSupported = false;
+    auto exts = system_info.available_extensions;
+	for (auto& ext : exts)
+	{
+        std::cout << ext.extensionName << std::endl;
+		meshShadingSupported = meshShadingSupported || strcmp(ext.extensionName, VK_EXT_MESH_SHADER_EXTENSION_NAME) == 0;
+		raytracingSupported = raytracingSupported || strcmp(ext.extensionName, VK_KHR_RAY_QUERY_EXTENSION_NAME) == 0;
+	}
+
+    if(meshShadingSupported)
+        printf("extention VK_EXT_MESH_SHADER_EXTENSION_NAME is available");
+
+    printf("Checking extention VK_EXT_MESH_SHADER_EXTENSION_NAME\n");
     if (system_info.is_extension_available("VK_EXT_MESH_SHADER_EXTENSION_NAME")) {
+        printf("extention VK_EXT_MESH_SHADER_EXTENSION_NAME is available");
         meshShadingSupported = true;
 		extensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
 
@@ -199,7 +223,9 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
 
     meshShadingEnabled = meshShadingSupported;
 
+    printf("Checking extention VK_KHR_RAY_QUERY_EXTENSION_NAME\n");
     if (system_info.is_extension_available("VK_KHR_RAY_QUERY_EXTENSION_NAME")) {
+        printf("extention VK_KHR_RAY_QUERY_EXTENSION_NAME is available");
         raytracingSupported = true;
 		extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
 		extensions.push_back(VK_KHR_RAY_QUERY_EXTENSION_NAME);
@@ -212,6 +238,7 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
 		*ppNext = &featuresAccelerationStructure;
 		ppNext = &featuresAccelerationStructure.pNext;
     }
+    std::exit(1);
 
     physicalDevice = vkb::PhysicalDeviceSelector{instance}
                          .set_minimum_version(1, 3)
@@ -225,7 +252,6 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
                          .value();
 
     checkDeviceCapabilities();
-
     device = vkb::DeviceBuilder{physicalDevice}.build().value();
 
     graphicsQueueFamily = device.get_queue_index(vkb::QueueType::graphics).value();
@@ -246,6 +272,9 @@ void GfxDevice::initVulkan(SDL_Window* window, const char* appName, const Versio
         };
         vmaCreateAllocator(&allocatorInfo, &allocator);
     }
+
+    printf ("Init Vulkan completed\n");
+
 }
 
 void GfxDevice::checkDeviceCapabilities()

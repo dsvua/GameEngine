@@ -4,7 +4,8 @@
 
 #include <glm/vec2.hpp>
 
-// #include "Renderer/Renderer.hpp"
+#include "Renderer/GameRenderer.hpp"
+#include "Renderer/GfxDevice.hpp"
 #include "Version.hpp"
 
 struct SDL_Window;
@@ -31,7 +32,8 @@ public:
     virtual void onWindowResize(){};
 
 protected:
-    // Renderer* renderer;
+    GameRenderer gameRenderer;
+    GfxDevice gfxDevice;
 
     SDL_Window* window{nullptr};
 

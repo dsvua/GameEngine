@@ -18,6 +18,11 @@ void GameRenderer::initSceneData(GfxDevice& gfxDevice, const std::filesystem::pa
     // Upload GPU buffers
 }
 
+void GameRenderer::draw(VkCommandBuffer cmd, GfxDevice &gfxDevice, const Camera &camera, const SceneData &sceneData)
+{
+    // run pipelines here
+}
+
 void GameRenderer::createPipelines(GfxDevice& gfxDevice)
 {
 	auto replace = [&](VkPipeline& pipeline, VkPipeline newPipeline)
@@ -112,7 +117,3 @@ void GameRenderer::createPrograms(GfxDevice& gfxDevice)
 
 }
 
-void GameRenderer::draw(VkCommandBuffer cmd, GfxDevice &gfxDevice, const Camera &camera, const SceneData &sceneData)
-{
-    // run pipelines here
-}
