@@ -1,46 +1,16 @@
 # add_subdirectory(plugins)
 
+file(GLOB_RECURSE GLSL_SOURCE_FILES "shaders/*.glsl")
+file(GLOB_RECURSE GLSL_HEADER_FILES "shaders/*.h" "Config.hpp")
+file(GLOB_RECURSE CPP_SOURCE_FILES "*.hpp" "*.cpp")
+
 ADD_EXECUTABLE(${PROJECT_NAME} 
-
-# SceneCache.cpp
-Engine.cpp
-main.cpp
-
-Core/JsonDataLoader.cpp
-Core/JsonFile.cpp
-Core/JsonMath.cpp
-
-#Math
-Math/IndexRange2.cpp
-Math/Transform.cpp
-Math/Util.cpp
-# Math/
-# Math/
-# Renderer
-Renderer/Vulkan/VolkImpl.cpp
-Renderer/Vulkan/BindlessSetManager.cpp
-Renderer/Vulkan/Descriptors.cpp
-Renderer/Vulkan/Init.cpp
-Renderer/Vulkan/Pipelines.cpp
-Renderer/Vulkan/Swapchain.cpp
-Renderer/Vulkan/Util.cpp
-Renderer/Vulkan/VmaImpl.cpp
-Renderer/Vulkan/VulkanImmediateExecutor.cpp
-Renderer/ImageLoader.cpp
-Renderer/Color.cpp
-Renderer/GfxDevice.cpp
-Renderer/ImageCache.cpp
-Renderer/MaterialCache.cpp
-Renderer/MipMapGeneration.cpp
-Renderer/NBuffer.cpp
-# Renderer/Scene.cpp
-# Renderer/
-# Renderer/
-
-Utils/GltfLoader.cpp
+  ${CPP_SOURCE_FILES}
+  ${GLSL_SOURCE_FILES}
+  ${GLSL_HEADER_FILES}
 )
 
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 target_link_libraries(${PROJECT_NAME} 
   PUBLIC 
@@ -83,3 +53,33 @@ else()
 endif()
 
 symlink_assets(${PROJECT_NAME})
+# symlink_shaders(${PROJECT_NAME})
+
+if(UNIX)
+  if(DEFINED ENV{VULKAN_SDK})
+    set(GLSL_VALIDATOR "$ENV{VULKAN_SDK}/bin/glslangValidator")
+  else()
+    set(GLSL_VALIDATOR "glslangValidator")
+  endif()
+elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "AMD64")
+  set(GLSL_VALIDATOR "$ENV{VULKAN_SDK}/Bin/glslangValidator.exe")
+else()
+  set(GLSL_VALIDATOR "$ENV{VULKAN_SDK}/Bin32/glslangValidator.exe")
+endif()
+
+# Thanks to: https://gist.github.com/evilactually/a0d191701cb48f157b05be7f74d79396
+set(SPIRV_OUTPUT_DIR "${PROJECT_BINARY_DIR}/spirv/")
+foreach(GLSL ${GLSL_SOURCE_FILES})
+  get_filename_component(STEM ${GLSL} NAME_WLE)
+  set(SPIRV "${SPIRV_OUTPUT_DIR}${STEM}.spv")
+  add_custom_command(
+    OUTPUT ${SPIRV}
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${SPIRV_OUTPUT_DIR}"
+    COMMAND ${GLSL_VALIDATOR} -V --target-env vulkan1.3 --quiet ${GLSL} -o ${SPIRV}
+    DEPENDS ${GLSL} ${GLSL_HEADER_FILES})
+  list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+endforeach()
+
+add_custom_target(compile_shaders DEPENDS ${SPIRV_BINARY_FILES})
+add_dependencies(${PROJECT_NAME} compile_shaders)
+

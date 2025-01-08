@@ -146,6 +146,31 @@ public:
 
     bool needsSwapchainRecreate() const { return swapchain.needsRecreation(); }
 
+public:
+    bool vSync{true};
+
+    bool meshShadingEnabled = true;
+ 	bool meshShadingSupported = false;
+	bool raytracingSupported = false;
+    bool cullingEnabled = true;
+    bool lodEnabled = true;
+    bool occlusionEnabled = true;
+    bool clusterOcclusionEnabled = true;
+    bool taskShadingEnabled = false; // disabled to have good performance on AMD HW
+    bool shadowsEnabled = true;
+    bool shadowblurEnabled = true;
+    bool shadowCheckerboard = false;
+    int shadowQuality = 1;
+    bool animationEnabled = false;
+    int debugGuiMode = 1;
+    int debugLodStep = 0;
+    bool debugSleep = false;
+
+    bool reloadShaders = false;
+    uint32_t reloadShadersColor = 0xffffffff;
+    double reloadShadersTimer = 0;
+
+
 private:
     void initVulkan(SDL_Window* window, const char* appName, const Version& appVersion);
     void checkDeviceCapabilities();
@@ -179,28 +204,5 @@ private: // data
 
     ImageId whiteImageId{NULL_IMAGE_ID};
     ImageId errorImageId{NULL_IMAGE_ID};
-
-    bool vSync{true};
-
-    bool meshShadingEnabled = true;
- 	bool meshShadingSupported = false;
-	bool raytracingSupported = false;
-    bool cullingEnabled = true;
-    bool lodEnabled = true;
-    bool occlusionEnabled = true;
-    bool clusterOcclusionEnabled = true;
-    bool taskShadingEnabled = false; // disabled to have good performance on AMD HW
-    bool shadowsEnabled = true;
-    bool shadowblurEnabled = true;
-    bool shadowCheckerboard = false;
-    int shadowQuality = 1;
-    bool animationEnabled = false;
-    int debugGuiMode = 1;
-    int debugLodStep = 0;
-    bool debugSleep = false;
-
-    bool reloadShaders = false;
-    uint32_t reloadShadersColor = 0xffffffff;
-    double reloadShadersTimer = 0;
 
 };

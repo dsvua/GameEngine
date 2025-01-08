@@ -3,7 +3,9 @@
 #include "GfxDevice.hpp"
 
 ImageCache::ImageCache(GfxDevice& gfxDevice) : gfxDevice(gfxDevice)
-{}
+{
+    images.reserve(2000); // reserve space in images vector to minimize reallocations at the beginning.
+}
 
 ImageId ImageCache::loadImageFromFile(
     const std::filesystem::path& path,
