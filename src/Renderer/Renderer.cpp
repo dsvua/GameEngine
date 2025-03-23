@@ -556,123 +556,25 @@ void Renderer::draw()
         drawRender(/* late= */ true, m_colorClear, m_depthClear, 2, 14, "post render", /* postPass= */ 1);
     }
 
-    printf("niagaraShadows \n");
-    niagaraShadows();
-
-    // Import Global illumination here
-    // drawShadow();
-
-    // drawDebug();
-
-    printf("endFrame \n");
-    endFrame();
-}
-
-void Renderer::niagaraShadows()
-{
-    auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
-
-
-    VkImageMemoryBarrier2 blitBarriers[2 + GBUFFER_COUNT] = {
-        // note: even though the source image has previous state as undef, we need to specify COMPUTE_SHADER to synchronize with submitStageMask below
-        imageBarrier(m_gfxDevice.m_swapchain.images[m_imageIndex],
-            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL),
-        imageBarrier(m_depthTarget.image,
-            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            VK_IMAGE_ASPECT_DEPTH_BIT)
-    };
-
-    for (uint32_t i = 0; i < GBUFFER_COUNT; ++i)
-        blitBarriers[i + 2] = imageBarrier(m_gbufferTargets[i].image,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-    pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, COUNTOF(blitBarriers), blitBarriers);
-
-
-    uint32_t timestamp = 16;
-
-    // checkerboard rendering: we dispatch half as many columns and xform them to fill the screen
-    bool shadowCheckerboard = false;
-    int shadowQuality = 1;
-    bool shadowsEnabled = true;
-    bool shadowblurEnabled = true;
-    int shadowWidthCB = shadowCheckerboard ? (m_gfxDevice.m_swapchain.width + 1) / 2 : m_gfxDevice.m_swapchain.width;
-    int shadowCheckerboardF = shadowCheckerboard ? 1 : 0;
-
-    vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 0);
-
-    VkImageMemoryBarrier2 preshadowBarrier =
-        imageBarrier(m_shadowTarget.image,
-            0, 0, VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL);
-
-    pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &preshadowBarrier);
-
+    // should be replaced by raytracing
     {
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, shadowQuality == 0 ? m_pipelines.m_shadowlqPipeline : m_pipelines.m_shadowhqPipeline);
+        auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
 
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_programs.m_shadowProgram.layout, 1, 1, &m_textureSet.second, 0, nullptr);
+        VkImageMemoryBarrier2 dummyBarrier =
+            imageBarrier(m_shadowTarget.image,
+                0, 0, VK_IMAGE_LAYOUT_UNDEFINED,
+                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL);
 
-        DescriptorInfo descriptors[] = { { m_shadowTarget.imageView, VK_IMAGE_LAYOUT_GENERAL },
-                { m_samplers.m_readSampler,m_depthTarget.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL },
-                m_buffers.m_tlas,
-                m_buffers.m_draw.buffer,
-                m_buffers.m_meshesh.buffer,
-                m_buffers.m_materials.buffer,
-                m_buffers.m_vertices.buffer,
-                m_buffers.m_indices.buffer,
-                m_samplers.m_textureSampler };
+        pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &dummyBarrier);
 
-        ShadowData shadowData = {};
-        shadowData.sunDirection = m_sunDirection;
-        shadowData.sunJitter = shadowblurEnabled ? 1e-2f : 0;
-        shadowData.inverseViewProjection = inverse(m_projection * m_view);
-        shadowData.imageSize = vec2(float(m_gfxDevice.m_swapchain.width), float(m_gfxDevice.m_swapchain.height));
-        shadowData.checkerboard = shadowCheckerboardF;
-
-        dispatch(commandBuffer, m_programs.m_shadowProgram, shadowWidthCB, m_gfxDevice.m_swapchain.height, shadowData, descriptors);
+        uint32_t timestamp = 16; // todo: we need an actual profiler
+        vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 0);
+        vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
+        vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 2);
     }
 
-    vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
-
-    for (int pass = 0; pass < (shadowblurEnabled ? 2 : 0); ++pass)
     {
-        const Image& blurFrom = pass == 0 ? m_shadowTarget : m_shadowblurTarget;
-        const Image& blurTo = pass == 0 ? m_shadowblurTarget : m_shadowTarget;
-
-        VkImageMemoryBarrier2 blurBarriers[] = {
-            imageBarrier(blurFrom.image,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL),
-            imageBarrier(blurTo.image,
-                pass == 0 ? 0 : VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, pass == 0 ? 0 : VK_ACCESS_SHADER_READ_BIT, pass == 0 ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_GENERAL,
-                VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL),
-        };
-
-        pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, COUNTOF(blurBarriers), blurBarriers);
-
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipelines.m_shadowblurPipeline);
-
-        DescriptorInfo descriptors[] = { { blurTo.imageView, VK_IMAGE_LAYOUT_GENERAL }, { m_samplers.m_readSampler, blurFrom.imageView, VK_IMAGE_LAYOUT_GENERAL }, { m_samplers.m_readSampler, m_depthTarget.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL } };
-
-        vec4 blurData = vec4(float(m_gfxDevice.m_swapchain.width), float(m_gfxDevice.m_swapchain.height), pass == 0 ? 1 : 0, m_camera.znear);
-
-        dispatch(commandBuffer, m_programs.m_shadowblurProgram, m_gfxDevice.m_swapchain.width, m_gfxDevice.m_swapchain.height, blurData, descriptors);
-    }
-
-    VkImageMemoryBarrier2 postblurBarrier =
-        imageBarrier(m_shadowTarget.image,
-            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
-            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL);
-
-    pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &postblurBarrier);
-
-    vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 2);
-
-    {
+        auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
         uint32_t timestamp = 19;
 
         vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 0);
@@ -685,7 +587,7 @@ void Renderer::niagaraShadows()
             ShadeData shadeData = {};
             shadeData.cameraPosition = m_camera.position;
             shadeData.sunDirection = m_sunDirection;
-            shadeData.shadowsEnabled = shadowsEnabled;
+            shadeData.shadowsEnabled = false;
             shadeData.inverseViewProjection = inverse(m_projection * m_view);
             shadeData.imageSize = vec2(float(m_gfxDevice.m_swapchain.width), float(m_gfxDevice.m_swapchain.height));
 
@@ -695,6 +597,52 @@ void Renderer::niagaraShadows()
         vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
     }
 
+    // Import Global illumination here
+    // drawShadow();
+
+    // drawDebug();
+
+    printf("endFrame \n");
+    endFrame();
+}
+
+void Renderer::endFrame()
+{
+    auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
+
+    VkImageMemoryBarrier2 presentBarrier = imageBarrier(m_gfxDevice.m_swapchain.images[m_imageIndex],
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
+        0, 0, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+    pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &presentBarrier);
+
+    vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, 1);
+
+    VK_CHECK(vkEndCommandBuffer(commandBuffer));
+
+    VkPipelineStageFlags submitStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+
+    VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = &m_frames[m_currentFrameIndex].m_waitSemaphore;
+    submitInfo.pWaitDstStageMask = &submitStageMask;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &m_frames[m_currentFrameIndex].m_signalSemaphore;
+
+    VK_CHECK_FORCE(vkQueueSubmit(m_queue, 1, &submitInfo, m_frames[m_currentFrameIndex].m_renderFence));
+
+    VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = &m_frames[m_currentFrameIndex].m_signalSemaphore;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = &m_gfxDevice.m_swapchain.swapchain;
+    presentInfo.pImageIndices = &m_imageIndex;
+
+    VK_CHECK_SWAPCHAIN(vkQueuePresentKHR(m_queue, &presentInfo));
+
+    m_frameIndex++;
 }
 
 bool Renderer::loadGLTFScene(std::string filename)
@@ -823,45 +771,6 @@ bool Renderer::loadGLTFScene(std::string filename)
     m_buffers.m_tlas = createTLAS(m_gfxDevice.m_device, m_buffers.m_tlasBuffer, m_buffers.m_tlasScratchBuffer, m_buffers.m_tlasInstanceBuffer, m_draws.size(), m_gfxDevice.m_memoryProperties);
 
     return true;
-}
-
-void Renderer::endFrame()
-{
-    auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
-
-    VkImageMemoryBarrier2 presentBarrier = imageBarrier(m_gfxDevice.m_swapchain.images[m_imageIndex],
-        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
-        0, 0, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-
-    pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &presentBarrier);
-
-    vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, 1);
-
-    VK_CHECK(vkEndCommandBuffer(commandBuffer));
-
-    VkPipelineStageFlags submitStageMask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-
-    VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &m_frames[m_currentFrameIndex].m_waitSemaphore;
-    submitInfo.pWaitDstStageMask = &submitStageMask;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &m_frames[m_currentFrameIndex].m_signalSemaphore;
-
-    VK_CHECK_FORCE(vkQueueSubmit(m_queue, 1, &submitInfo, m_frames[m_currentFrameIndex].m_renderFence));
-
-    VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &m_frames[m_currentFrameIndex].m_signalSemaphore;
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = &m_gfxDevice.m_swapchain.swapchain;
-    presentInfo.pImageIndices = &m_imageIndex;
-
-    VK_CHECK_SWAPCHAIN(vkQueuePresentKHR(m_queue, &presentInfo));
-
-    m_frameIndex++;
 }
 
 void Renderer::cleanup()

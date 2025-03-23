@@ -71,7 +71,7 @@ struct alignas(16) ShadeData
 	vec3 cameraPosition;
 	float pad0;
 	vec3 sunDirection;
-	int shadowsEnabled;
+	int shadowsEnabled = false;
 
 	mat4 inverseViewProjection;
 
