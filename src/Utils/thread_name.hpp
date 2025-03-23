@@ -10,42 +10,42 @@
 namespace this_thread {
 // I'd like to make this constinit, but it doesn't work on current version of
 // libstdc++. Works fine with libc++ though.
-inline thread_local std::string thread_name{};
-inline thread_local size_t thread_id{};
+inline thread_local std::string threadName{};
+inline thread_local size_t threadId{};
 } // namespace this_thread
 
 /// This must be called before calling init() on the executor.
-inline void hook_init_ex_cpu_thread_name(tmc::ex_cpu& Executor) {
-  Executor.set_thread_init_hook([](size_t Slot) {
-    this_thread::thread_name = std::string("cpu thread ") + std::to_string(Slot);
-  });
+inline void hookInitExCpuThreadName(tmc::ex_cpu& Executor) {
+    Executor.set_thread_init_hook([](size_t Slot) {
+        this_thread::threadName = std::string("cpu thread ") + std::to_string(Slot);
+    });
 }
 
 /// This must be called before calling init() on the executor.
-inline void hook_init_ex_cpu_thread_id(tmc::ex_cpu& Executor) {
-  Executor.set_thread_init_hook([](size_t Slot) {
-    this_thread::thread_id = Slot;
-  });
+inline void hookInitExCpuThreadId(tmc::ex_cpu& Executor) {
+    Executor.set_thread_init_hook([](size_t Slot) {
+        this_thread::threadId = Slot;
+    });
 }
 
 // This has been observed to produce the wrong results (always prints the same
 // thread name) on Clang 16, due to incorrectly caching thread_locals across
 // suspend points. The issue has been resolved in Clang 17.
-inline std::string get_thread_name() {
-  std::string tmc_tid = this_thread::thread_name;
-  if (!tmc_tid.empty()) {
-    return tmc_tid;
-  } else {
-    std::ostringstream id;
-    id << std::this_thread::get_id();
-    return "external thread " + id.str();
-  }
+inline std::string getThreadName() {
+    std::string tmc_tid = this_thread::threadName;
+    if (!tmc_tid.empty()) {
+        return tmc_tid;
+    } else {
+        std::ostringstream id;
+        id << std::this_thread::get_id();
+        return "external thread " + id.str();
+    }
 }
 
-inline size_t get_thread_id() {
-  return this_thread::thread_id;
+inline size_t getThreadId() {
+    return this_thread::threadId;
 }
 
-inline void print_thread_name() {
-  std::printf("%s\n", get_thread_name().c_str());
+inline void printThreadName() {
+    std::printf("%s\n", getThreadName().c_str());
 }

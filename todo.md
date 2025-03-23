@@ -110,19 +110,19 @@
 ## Variable and Function Naming (camelCase)
 
 ### thread_name.hpp
-- [ ] Rename `thread_name` to `threadName` (line 13)
-- [ ] Rename `thread_id` to `threadId` (line 14)
-- [ ] Rename `hook_init_ex_cpu_thread_name` to `hookInitExCpuThreadName` (line 18)
-- [ ] Rename `hook_init_ex_cpu_thread_id` to `hookInitExCpuThreadId` (line 25)
-- [ ] Rename `get_thread_name` to `getThreadName` (line 34)
-- [ ] Rename `get_thread_id` to `getThreadId` (line 45)
-- [ ] Rename `print_thread_name` to `printThreadName` (line 49)
+- [x] Rename `thread_name` to `threadName` (line 13)
+- [x] Rename `thread_id` to `threadId` (line 14)
+- [x] Rename `hook_init_ex_cpu_thread_name` to `hookInitExCpuThreadName` (line 18)
+- [x] Rename `hook_init_ex_cpu_thread_id` to `hookInitExCpuThreadId` (line 25)
+- [x] Rename `get_thread_name` to `getThreadName` (line 34)
+- [x] Rename `get_thread_id` to `getThreadId` (line 45)
+- [x] Rename `print_thread_name` to `printThreadName` (line 49)
 
 ### niagara/common.h
 - [ ] Rename `countof_helper` to `countofHelper` (line 44)
 
 ### Update Related References
-- [ ] Update all references to the renamed functions and variables in main.cpp
+- [x] Update all references to the renamed functions and variables in main.cpp
 - [x] Update all references to the renamed functions and variables in Renderer.cpp
 - [ ] Check all other files for references to renamed identifiers
 
@@ -133,7 +133,7 @@
 - [ ] Renderer.h (check all indentation)
 - [ ] main.cpp (check all indentation)
 - [ ] Renderer.cpp (check all indentation)
-- [ ] thread_name.hpp (check all indentation)
+- [x] thread_name.hpp (check all indentation)
 - [ ] All other source files in src/ directory
 
 ## File Extension Consistency (.hpp/.cpp for C++, .h for C-compatible)

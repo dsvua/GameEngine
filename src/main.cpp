@@ -11,7 +11,7 @@ int main(int __argc, const char** __argv)
 #endif
 {
     tmc::ex_cpu executor;
-    hook_init_ex_cpu_thread_id(executor);
+    hookInitExCpuThreadId(executor);
     executor.init();
 
     Renderer renderer;
