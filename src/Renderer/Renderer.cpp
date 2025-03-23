@@ -89,7 +89,7 @@ Renderer::Renderer()
     createPrograms();
     createPipelines();
     createFramesData();
-    vkGetDeviceQueue(m_gfxDevice.device, m_gfxDevice.familyIndex, 0, &m_queue);
+    vkGetDeviceQueue(m_gfxDevice.device, m_gfxDevice.m_familyIndex, 0, &m_queue);
 
     m_camera.position = { 0.0f, 0.0f, 0.0f };
 	m_camera.orientation = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -170,7 +170,7 @@ void Renderer::createFramesData()
     for (int i = 0; i < FRAMES_COUNT; i++)
     {
 
-        m_frames[i].commandPool = createCommandPool(m_gfxDevice.device, m_gfxDevice.familyIndex);
+        m_frames[i].commandPool = createCommandPool(m_gfxDevice.device, m_gfxDevice.m_familyIndex);
         assert(m_frames[i].commandPool);
 
         VkCommandBufferAllocateInfo allocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
@@ -193,7 +193,7 @@ void Renderer::createFramesData()
 
     }
 
-    m_immCommandPool = createCommandPool(m_gfxDevice.device, m_gfxDevice.familyIndex);
+    m_immCommandPool = createCommandPool(m_gfxDevice.device, m_gfxDevice.m_familyIndex);
     VkCommandBufferAllocateInfo allocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
     allocateInfo.commandPool = m_immCommandPool;
     allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -224,7 +224,7 @@ bool Renderer::beginFrame()
     
     m_frames[m_currentFrameIndex].deltaTime = (std::chrono::duration_cast<std::chrono::milliseconds>(m_frames[m_lastFrameIndex].frameTimeStamp - m_frames[m_currentFrameIndex].frameTimeStamp)).count();
 
-    SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.swapchain, m_gfxDevice.m_physicalDevice, m_gfxDevice.device, m_gfxDevice.surface, m_gfxDevice.familyIndex, m_gfxDevice.m_window, m_gfxDevice.swapchainFormat);
+    SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.swapchain, m_gfxDevice.m_physicalDevice, m_gfxDevice.device, m_gfxDevice.surface, m_gfxDevice.m_familyIndex, m_gfxDevice.m_window, m_gfxDevice.swapchainFormat);
 
     if (swapchainStatus == Swapchain_NotReady)
         return false;

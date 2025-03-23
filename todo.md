@@ -8,7 +8,7 @@
 - [x] Rename `instance` to `m_instance`
 - [x] Rename `gbufferInfo` to `m_gbufferInfo`
 - [x] Rename `memoryProperties` to `m_memoryProperties`
-- [ ] Rename `familyIndex` to `m_familyIndex`
+- [x] Rename `familyIndex` to `m_familyIndex`
 - [ ] Rename `device` to `m_device`
 - [ ] Rename `surface` to `m_surface`
 - [ ] Rename `swapchain` to `m_swapchain`
