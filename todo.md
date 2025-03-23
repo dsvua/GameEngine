@@ -6,8 +6,8 @@
 - [x] Rename `window` to `m_window`
 - [x] Rename `physicalDevice` to `m_physicalDevice`
 - [x] Rename `instance` to `m_instance`
-- [ ] Rename `gbufferInfo` to `m_gbufferInfo`
-- [ ] Rename `memoryProperties` to `m_memoryProperties`
+- [x] Rename `gbufferInfo` to `m_gbufferInfo`
+- [x] Rename `memoryProperties` to `m_memoryProperties`
 - [ ] Rename `familyIndex` to `m_familyIndex`
 - [ ] Rename `device` to `m_device`
 - [ ] Rename `surface` to `m_surface`

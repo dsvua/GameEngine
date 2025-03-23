@@ -156,7 +156,7 @@ GfxDevice initDevice()
 	result.swapchainFormat = getSwapchainFormat(result.m_physicalDevice, result.surface);
 	result.depthFormat = VK_FORMAT_D32_SFLOAT;
 
-	vkGetPhysicalDeviceMemoryProperties(result.m_physicalDevice, &result.memoryProperties);
+	vkGetPhysicalDeviceMemoryProperties(result.m_physicalDevice, &result.m_memoryProperties);
 
 	createSwapchain(result.swapchain, result.m_physicalDevice, result.device, result.surface, result.familyIndex, result.m_window, result.swapchainFormat);
 

@@ -103,11 +103,11 @@ Renderer::Renderer()
 
     m_sunDirection = normalize(vec3(1.0f, 1.0f, 1.0f));
 
-    m_gfxDevice.gbufferInfo.colorAttachmentCount = gbufferCount;
-	m_gfxDevice.gbufferInfo.pColorAttachmentFormats = m_gbufferFormats;
-	m_gfxDevice.gbufferInfo.depthAttachmentFormat = m_gfxDevice.depthFormat;
+    m_gfxDevice.m_gbufferInfo.colorAttachmentCount = gbufferCount;
+	m_gfxDevice.m_gbufferInfo.pColorAttachmentFormats = m_gbufferFormats;
+	m_gfxDevice.m_gbufferInfo.depthAttachmentFormat = m_gfxDevice.depthFormat;
 
-    createBuffer(m_buffers.scratch, m_gfxDevice.device, m_gfxDevice.memoryProperties, 128 * 1024 * 1024, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    createBuffer(m_buffers.scratch, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, 128 * 1024 * 1024, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     loadGLTFScene("../../../Documents/github/niagara_bistro/bistrox.gltf");
 }
@@ -149,9 +149,9 @@ void Renderer::createPipelines()
 
     replace(m_pipelines.depthreducePipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.depthreduceProgram));
 
-    replace(m_pipelines.meshtaskPipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ false, /* TASK= */ true }));
-    replace(m_pipelines.meshtasklatePipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true }));
-    replace(m_pipelines.meshtaskpostPipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true, /* POST= */ 1 }));
+    replace(m_pipelines.meshtaskPipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ false, /* TASK= */ true }));
+    replace(m_pipelines.meshtasklatePipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true }));
+    replace(m_pipelines.meshtaskpostPipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true, /* POST= */ 1 }));
 
     replace(m_pipelines.finalPipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.finalProgram));
 
@@ -252,18 +252,18 @@ bool Renderer::beginFrame()
             destroyImage(m_shadowblurTarget, m_gfxDevice.device);
 
         for (uint32_t i = 0; i < gbufferCount; ++i)
-            createImage(m_gbufferTargets[i], m_gfxDevice.device, m_gfxDevice.memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gbufferFormats[i], VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-        createImage(m_depthTarget, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gfxDevice.depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+            createImage(m_gbufferTargets[i], m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gbufferFormats[i], VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_depthTarget, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gfxDevice.depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-        createImage(m_shadowTarget, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-        createImage(m_shadowblurTarget, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_shadowTarget, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_shadowblurTarget, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
         // Note: previousPow2 makes sure all reductions are at most by 2x2 which makes sure they are conservative
         m_depthPyramidWidth = previousPow2(m_gfxDevice.swapchain.width);
         m_depthPyramidHeight = previousPow2(m_gfxDevice.swapchain.height);
         m_depthPyramidLevels = getImageMipLevels(m_depthPyramidWidth, m_depthPyramidHeight);
 
-        createImage(m_depthPyramid, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_depthPyramidWidth, m_depthPyramidHeight, m_depthPyramidLevels, VK_FORMAT_R32_SFLOAT, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+        createImage(m_depthPyramid, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_depthPyramidWidth, m_depthPyramidHeight, m_depthPyramidLevels, VK_FORMAT_R32_SFLOAT, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 
         for (uint32_t i = 0; i < m_depthPyramidLevels; ++i)
         {
@@ -874,7 +874,7 @@ bool Renderer::loadGLTFScene(std::string filename)
 	for (size_t i = 0; i < m_texturePaths.size(); ++i)
 	{
 		Image image;
-		if (!loadDDSImage(image, m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.memoryProperties, m_buffers.scratch, m_texturePaths[i].c_str()))
+		if (!loadDDSImage(image, m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties, m_buffers.scratch, m_texturePaths[i].c_str()))
 		{
 			printf("Error: image N: %ld %s failed to load\n", i, m_texturePaths[i].c_str());
 			return 1;
@@ -935,12 +935,12 @@ bool Renderer::loadGLTFScene(std::string filename)
 
     uint32_t raytracingBufferFlags = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 
-    createBuffer(m_buffers.meshesh, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_geometry.meshes.size() * sizeof(Mesh), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.materials, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_materials.size() * sizeof(Material), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.vertices, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_geometry.vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | raytracingBufferFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.indices, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_geometry.indices.size() * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | raytracingBufferFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.meshlets, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_geometry.meshlets.size() * sizeof(Meshlet), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.meshletdata, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_geometry.meshletdata.size() * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.meshesh, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.meshes.size() * sizeof(Mesh), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.materials, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_materials.size() * sizeof(Material), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.vertices, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | raytracingBufferFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.indices, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.indices.size() * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | raytracingBufferFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.meshlets, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.meshlets.size() * sizeof(Meshlet), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.meshletdata, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.meshletdata.size() * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshesh, m_buffers.scratch, m_geometry.meshes.data(), m_geometry.meshes.size() * sizeof(Mesh));
     uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.materials, m_buffers.scratch, m_materials.data(), m_materials.size() * sizeof(Material));
@@ -951,20 +951,20 @@ bool Renderer::loadGLTFScene(std::string filename)
     uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshlets, m_buffers.scratch, m_geometry.meshlets.data(), m_geometry.meshlets.size() * sizeof(Meshlet));
     uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshletdata, m_buffers.scratch, m_geometry.meshletdata.data(), m_geometry.meshletdata.size() * sizeof(uint32_t));
 
-    createBuffer(m_buffers.draw, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_draws.size() * sizeof(MeshDraw), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    createBuffer(m_buffers.DrawVisibility, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_draws.size() * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.TaskCommands, m_gfxDevice.device, m_gfxDevice.memoryProperties, TASK_WGLIMIT * sizeof(MeshTaskCommand), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.CommandCount, m_gfxDevice.device, m_gfxDevice.memoryProperties, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.draw, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_draws.size() * sizeof(MeshDraw), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    createBuffer(m_buffers.DrawVisibility, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_draws.size() * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.TaskCommands, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, TASK_WGLIMIT * sizeof(MeshTaskCommand), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.CommandCount, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     // TODO: there's a way to implement cluster visibility persistence *without* using bitwise storage at all, which may be beneficial on the balance, so we should try that.
     // *if* we do that, we can drop meshletVisibilityOffset et al from everywhere
-    createBuffer(m_buffers.MeshletVisibility, m_gfxDevice.device, m_gfxDevice.memoryProperties, m_buffers.meshletVisibilityBytes, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.MeshletVisibility, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_buffers.meshletVisibilityBytes, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.draw, m_buffers.scratch, m_draws.data(), m_draws.size() * sizeof(MeshDraw));
 
     std::vector<VkDeviceSize> compactedSizes;
-    buildBLAS(m_gfxDevice.device, m_geometry.meshes, m_buffers.vertices, m_buffers.indices, m_blas, compactedSizes, m_buffers.blasBuffer, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.memoryProperties);
-    compactBLAS(m_gfxDevice.device, m_blas, compactedSizes, m_buffers.blasBuffer, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.memoryProperties);
+    buildBLAS(m_gfxDevice.device, m_geometry.meshes, m_buffers.vertices, m_buffers.indices, m_blas, compactedSizes, m_buffers.blasBuffer, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties);
+    compactBLAS(m_gfxDevice.device, m_blas, compactedSizes, m_buffers.blasBuffer, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties);
 
     m_blasAddresses.resize(m_blas.size());
 
@@ -976,7 +976,7 @@ bool Renderer::loadGLTFScene(std::string filename)
         m_blasAddresses[i] = vkGetAccelerationStructureDeviceAddressKHR(m_gfxDevice.device, &info);
     }
 
-    createBuffer(m_buffers.tlasInstanceBuffer, m_gfxDevice.device, m_gfxDevice.memoryProperties, sizeof(VkAccelerationStructureInstanceKHR) * m_draws.size(), VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    createBuffer(m_buffers.tlasInstanceBuffer, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, sizeof(VkAccelerationStructureInstanceKHR) * m_draws.size(), VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     for (size_t i = 0; i < m_draws.size(); ++i)
     {
@@ -989,7 +989,7 @@ bool Renderer::loadGLTFScene(std::string filename)
         memcpy(static_cast<VkAccelerationStructureInstanceKHR*>(m_buffers.tlasInstanceBuffer.data) + i, &instance, sizeof(VkAccelerationStructureInstanceKHR));
     }
 
-    m_buffers.tlas = createTLAS(m_gfxDevice.device, m_buffers.tlasBuffer, m_buffers.tlasScratchBuffer, m_buffers.tlasInstanceBuffer, m_draws.size(), m_gfxDevice.memoryProperties);
+    m_buffers.tlas = createTLAS(m_gfxDevice.device, m_buffers.tlasBuffer, m_buffers.tlasScratchBuffer, m_buffers.tlasInstanceBuffer, m_draws.size(), m_gfxDevice.m_memoryProperties);
 
     return true;
 }

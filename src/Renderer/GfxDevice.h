@@ -12,8 +12,8 @@ struct GfxDevice {
     SDL_Window * m_window;
     VkPhysicalDevice m_physicalDevice;
 	VkInstance m_instance;
-    VkPipelineRenderingCreateInfo gbufferInfo = { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
-    VkPhysicalDeviceMemoryProperties memoryProperties;
+    VkPipelineRenderingCreateInfo m_gbufferInfo = { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
+    VkPhysicalDeviceMemoryProperties m_memoryProperties;
     uint32_t familyIndex;
     VkDevice device;
     VkSurfaceKHR surface;
