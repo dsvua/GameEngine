@@ -15,4 +15,4 @@ fi
 # Run the application
 echo "Starting AIGameEngine - CTRL+C to exit..."
 # Run with unlimited time
-./bin/GameEngine
+(cd bin && ./GameEngine)

@@ -616,7 +616,15 @@ void Renderer::niagaraShadows()
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_programs.m_shadowProgram.layout, 1, 1, &m_textureSet.second, 0, nullptr);
 
-        DescriptorInfo descriptors[] = { { m_shadowTarget.imageView, VK_IMAGE_LAYOUT_GENERAL }, { m_samplers.m_readSampler, m_depthTarget.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, m_buffers.m_tlas, m_buffers.m_draw.buffer, m_buffers.m_meshesh.buffer, m_buffers.m_materials.buffer, m_buffers.m_vertices.buffer, m_buffers.m_indices.buffer, m_samplers.m_textureSampler };
+        DescriptorInfo descriptors[] = { { m_shadowTarget.imageView, VK_IMAGE_LAYOUT_GENERAL },
+                { m_samplers.m_readSampler,m_depthTarget.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL },
+                m_buffers.m_tlas,
+                m_buffers.m_draw.buffer,
+                m_buffers.m_meshesh.buffer,
+                m_buffers.m_materials.buffer,
+                m_buffers.m_vertices.buffer,
+                m_buffers.m_indices.buffer,
+                m_samplers.m_textureSampler };
 
         ShadowData shadowData = {};
         shadowData.sunDirection = m_sunDirection;
