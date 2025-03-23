@@ -34,3 +34,12 @@
 [submodule "external/meshoptimizer"]
 	path = external/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer.git
+[submodule "external/TooManyCooks"]
+	path = external/TooManyCooks
+	url = https://github.com/tzcnt/TooManyCooks.git
+[submodule "external/quill"]
+	path = external/quill
+	url = https://github.com/odygrd/quill.git
+[submodule "external/ozz-animation"]
+	path = external/ozz-animation
+	url = https://github.com/guillaumeblanc/ozz-animation.git

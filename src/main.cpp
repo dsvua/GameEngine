@@ -1,12 +1,28 @@
-// #include "libfork/core.hpp"
-#include "libfork/schedule.hpp"
-#include "Engine.hpp"
+#define TMC_IMPL
 
-int main() {
-  
-  lf::lazy_pool pool; // 4 worker threads
-  Params ps;
-  Engine* engine = new Engine(ps);
+#include "Renderer/Renderer.h"
+#include "tmc/ex_cpu.hpp"
+#include "Utils/thread_name.hpp"
 
-//   int fib_10 = lf::sync_wait(pool, fib, 10);
+#ifdef WIN32
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#else
+int main(int __argc, const char** __argv)
+#endif
+{
+    tmc::ex_cpu executor;
+    hook_init_ex_cpu_thread_id(executor);
+    executor.init();
+
+    Renderer renderer;
+
+    while (!shouldQuit())
+    {
+        printf("Calling renderer.draw() \n");
+        renderer.draw();
+    }
+
+    renderer.cleanup();
+    
+    return 0;
 }

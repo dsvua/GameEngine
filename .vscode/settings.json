@@ -90,6 +90,11 @@
         "__split_buffer": "cpp",
         "__tree": "cpp",
         "queue": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "future": "cpp",
+        "*.ipp": "cpp",
+        "target": "cpp",
+        "__mutex_base": "cpp",
+        "__bit_reference": "cpp"
     }
 }

@@ -1,15 +1,16 @@
 find_package(Vulkan REQUIRED)
 
 add_subdirectory(SDL)
-add_subdirectory(libfork)
-add_subdirectory(vk-bootstrap)
+# add_subdirectory(libfork)
+# add_subdirectory(vk-bootstrap)
 add_subdirectory(glm)
 add_subdirectory(vma)
-add_subdirectory(tracy)
+# add_subdirectory(tracy)
 add_subdirectory(volk)
 add_subdirectory(stb)
 add_subdirectory(meshoptimizer)
-# add_subdirectory(libfork)
+add_subdirectory(ozz-animation)
+# add_subdirectory(quill) # logging library
 
 ## json
 option(JSON_MultipleHeaders "Use non-amalgamated version of the library." ON)
