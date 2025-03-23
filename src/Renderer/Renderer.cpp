@@ -24,10 +24,13 @@ Renderer::Renderer()
     createFramesData();
     vkGetDeviceQueue(m_gfxDevice.m_device, m_gfxDevice.m_familyIndex, 0, &m_queue);
 
-    m_camera.position = { 0.0f, 0.0f, 0.0f };
-	m_camera.orientation = { 0.0f, 0.0f, 0.0f, 1.0f };
-	m_camera.fovY = glm::radians(70.f);
-	m_camera.znear = 0.1f;
+    // Initialize camera with default parameters
+    m_camera = Camera(
+        vec3(0.0f, 0.0f, 0.0f),             // position
+        quat(0.0f, 0.0f, 0.0f, 1.0f),       // orientation
+        glm::radians(70.0f),                // fovY
+        0.1f                                // znear
+    );
 
     // material index 0 is always dummy
 	m_materials.resize(1);
@@ -268,25 +271,42 @@ bool Renderer::beginFrame()
     vkCmdWriteTimestamp(m_frames[m_currentFrameIndex].m_commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
 
 
-    // Use the new free function to calculate view matrix
-    m_view = calculateViewMatrix(m_camera);
+    // Use the Camera class methods to get view and projection matrices
+    m_view = m_camera.getViewMatrix();
     
     // Calculate projection matrix
-    m_projection = perspectiveProjection(m_camera.fovY, float(m_gfxDevice.m_swapchain.width) / float(m_gfxDevice.m_swapchain.height), m_camera.znear);
+    m_projection = m_camera.getProjectionMatrix(float(m_gfxDevice.m_swapchain.width) / float(m_gfxDevice.m_swapchain.height), m_drawDistance);
 
     m_projectionT = transpose(m_projection);
 
-    // Use the new free function to set up culling data
-    m_cullData = setupCullingData(
-        m_view,
-        m_projection,
-        m_camera,
-        m_drawDistance,
-        uint32_t(m_draws.size()),
-        float(m_depthPyramidWidth),
-        float(m_depthPyramidHeight),
-        float(m_gfxDevice.m_swapchain.height)
-    );
+    // Set up culling data with camera parameters
+    m_cullData.view = m_view;
+    
+    // Get projection parameters
+    float aspectRatio = float(m_gfxDevice.m_swapchain.width) / float(m_gfxDevice.m_swapchain.height);
+    m_cullData.P00 = 1.0f / (tanf(m_camera.getFovY() * 0.5f) * aspectRatio);
+    m_cullData.P11 = 1.0f / tanf(m_camera.getFovY() * 0.5f);
+    m_cullData.znear = m_camera.getZNear();
+    m_cullData.zfar = m_drawDistance;
+    
+    // Calculate frustum planes coefficients
+    m_cullData.frustum[0] = -1.0f / m_cullData.P00; // left
+    m_cullData.frustum[1] = 1.0f / m_cullData.P00;  // right
+    m_cullData.frustum[2] = -1.0f / m_cullData.P11; // bottom
+    m_cullData.frustum[3] = 1.0f / m_cullData.P11;  // top
+    
+    // Set other culling parameters
+    m_cullData.lodTarget = 0.75f * 4.0f / float(m_gfxDevice.m_swapchain.height);
+    m_cullData.pyramidWidth = float(m_depthPyramidWidth);
+    m_cullData.pyramidHeight = float(m_depthPyramidHeight);
+    m_cullData.drawCount = uint32_t(m_draws.size());
+    
+    // Enable culling features
+    m_cullData.cullingEnabled = 1;
+    m_cullData.lodEnabled = 1;
+    m_cullData.occlusionEnabled = 1;
+    m_cullData.clusterOcclusionEnabled = 1;
+    m_cullData.clusterBackfaceEnabled = 1;
 
     Globals m_globals = {};
     m_globals.projection = m_projection;
@@ -534,6 +554,10 @@ void Renderer::draw()
         printf("Something wrong with beginFrame \n");
         return;
     }
+    
+    // Update camera based on keyboard input
+    float deltaTimeSeconds = m_frames[m_currentFrameIndex].m_deltaTime / 1000.0f;
+    m_camera.update(deltaTimeSeconds);
     printf("drawCull \n");
     drawCull(m_pipelines.m_taskcullPipeline, 2, "early cull", /* late= */ false);
     // drawCull(m_pipelines.drawcullPipeline, 2, "early cull", /* late= */ false);
@@ -607,7 +631,7 @@ void Renderer::draw()
             DescriptorInfo descriptors[] = { { m_gfxDevice.m_swapchainImageViews[m_imageIndex], VK_IMAGE_LAYOUT_GENERAL }, { m_samplers.m_readSampler, m_gbufferTargets[0].imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.m_readSampler, m_gbufferTargets[1].imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.m_readSampler, m_depthTarget.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.m_readSampler, m_shadowTarget.imageView, VK_IMAGE_LAYOUT_GENERAL } };
 
             ShadeData shadeData = {};
-            shadeData.cameraPosition = m_camera.position;
+            shadeData.cameraPosition = m_camera.getPosition();
             shadeData.sunDirection = m_sunDirection;
             shadeData.shadowsEnabled = false;
             shadeData.inverseViewProjection = inverse(m_projection * m_view);
@@ -669,6 +693,7 @@ void Renderer::endFrame()
 
 bool Renderer::loadGLTFScene(std::string filename)
 {
+    // Use the existing loadScene function with our camera class directly
     if (!loadScene(m_geometry, m_materials, m_draws, m_texturePaths, m_animations, m_camera, m_sunDirection, filename.c_str(), true, false))
     {
         printf("Error: scene %s failed to load\n", filename.c_str());

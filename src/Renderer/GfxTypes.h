@@ -165,13 +165,7 @@ struct Geometry
 	std::vector<Mesh> meshes;
 };
 
-struct Camera
-{
-	vec3 position;
-	quat orientation;
-	float fovY;
-	float znear;
-};
+// Camera class is now defined in Camera.h
 
 struct Keyframe
 {

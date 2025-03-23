@@ -94,50 +94,7 @@ void createRenderTargetBarriers(VkImage depthImage, const VkImage* colorImages, 
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
 }
 
-mat4 calculateViewMatrix(const Camera& camera)
-{
-    mat4 view = glm::mat4_cast(camera.orientation);
-    view[3] = vec4(camera.position, 1.0f);
-    view = inverse(view);
-    // Flip Z for Vulkan coordinate system
-    return glm::scale(glm::identity<glm::mat4>(), vec3(1, 1, -1)) * view;
-}
-
-CullData setupCullingData(
-    const mat4& view, 
-    const mat4& projection,
-    const Camera& camera,
-    float drawDistance,
-    uint32_t drawCount,
-    float depthPyramidWidth,
-    float depthPyramidHeight,
-    float screenHeight)
-{
-    mat4 projectionT = transpose(projection);
-    vec4 frustumX = normalizePlane(projectionT[3] + projectionT[0]); // x + w < 0
-    vec4 frustumY = normalizePlane(projectionT[3] + projectionT[1]); // y + w < 0
-    
-    CullData cullData = {};
-    cullData.view = view;
-    cullData.P00 = projection[0][0];
-    cullData.P11 = projection[1][1];
-    cullData.znear = camera.znear;
-    cullData.zfar = drawDistance;
-    cullData.frustum[0] = frustumX.x;
-    cullData.frustum[1] = frustumX.z;
-    cullData.frustum[2] = frustumY.y;
-    cullData.frustum[3] = frustumY.z;
-    cullData.drawCount = drawCount;
-    cullData.cullingEnabled = true;
-    cullData.lodEnabled = true;
-    cullData.occlusionEnabled = true;
-    cullData.lodTarget = (2 / cullData.P11) * (1.f / screenHeight) * (1 << 0); // 1px
-    cullData.pyramidWidth = depthPyramidWidth;
-    cullData.pyramidHeight = depthPyramidHeight;
-    cullData.clusterOcclusionEnabled = true;
-    
-    return cullData;
-}
+// These functions have been moved to the Camera class
 
 void clearBuffer(
     VkCommandBuffer commandBuffer, 

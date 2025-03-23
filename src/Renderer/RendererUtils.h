@@ -7,6 +7,9 @@
 #include "GfxTypes.h"
 #include <stdint.h>
 
+// Forward declaration
+class Camera;
+
 /**
  * PCG (Permuted Congruential Generator) random number generator state.
  * Holds the current state and increment for the generator.
@@ -128,37 +131,6 @@ VkRect2D createScissorRect(uint32_t width, uint32_t height);
  * @param barriers Output array to store the barriers (should be large enough for colorCount + 1)
  */
 void createRenderTargetBarriers(VkImage depthImage, const VkImage* colorImages, uint32_t colorCount, VkImageMemoryBarrier2* barriers);
-
-/**
- * Calculates the view matrix from camera position and orientation.
- * 
- * @param camera The camera with position and orientation
- * @return The view matrix for rendering
- */
-mat4 calculateViewMatrix(const Camera& camera);
-
-/**
- * Sets up culling data for the renderer based on camera and view parameters.
- * 
- * @param view The view matrix
- * @param projection The projection matrix 
- * @param camera The camera data
- * @param drawDistance Maximum render distance
- * @param drawCount Number of objects to potentially render
- * @param depthPyramidWidth Width of the depth pyramid texture
- * @param depthPyramidHeight Height of the depth pyramid texture 
- * @param screenHeight Screen height for LOD calculations
- * @return Initialized CullData structure
- */
-CullData setupCullingData(
-    const mat4& view, 
-    const mat4& projection,
-    const Camera& camera,
-    float drawDistance,
-    uint32_t drawCount,
-    float depthPyramidWidth,
-    float depthPyramidHeight,
-    float screenHeight);
 
 /**
  * Clears a buffer using a command buffer and sets up necessary pipeline barriers.

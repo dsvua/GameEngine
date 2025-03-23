@@ -2,6 +2,7 @@
 
 #include "GfxDevice.h"
 #include "GfxTypes.h"
+#include "Camera.h"
 #include "niagara/shaders.h"
 #include "niagara/resources.h"
 #include <chrono>

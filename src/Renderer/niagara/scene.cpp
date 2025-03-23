@@ -414,9 +414,9 @@ bool loadScene(Geometry& geometry, std::vector<Material>& materials, std::vector
 
 			assert(node->camera->type == cgltf_camera_type_perspective);
 
-			camera.position = vec3(translation[0], translation[1], translation[2]);
-			camera.orientation = quat(rotation[0], rotation[1], rotation[2], rotation[3]);
-			camera.fovY = node->camera->data.perspective.yfov;
+			camera.setPosition(vec3(translation[0], translation[1], translation[2]));
+			camera.setOrientation(quat(rotation[0], rotation[1], rotation[2], rotation[3]));
+			camera.setFovY(node->camera->data.perspective.yfov);
 		}
 
 		if (node->light && node->light->type == cgltf_light_type_directional)
