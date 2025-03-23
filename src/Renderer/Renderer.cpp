@@ -141,13 +141,14 @@ void Renderer::createFramesData()
 
 bool Renderer::beginFrame()
 {
+    m_currentFrameIndex = m_frameIndex % FRAMES_COUNT;
+    m_lastFrameIndex = (m_frameIndex + FRAMES_COUNT - 1) % FRAMES_COUNT;
+    
     printf("vkWaitForFences \n");
     VK_CHECK(vkWaitForFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].m_renderFence, VK_TRUE, ~0ull));
     printf("vkResetFences \n");
     VK_CHECK(vkResetFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].m_renderFence));
 
-    m_currentFrameIndex = m_frameIndex % FRAMES_COUNT;
-    m_lastFrameIndex = (m_frameIndex + FRAMES_COUNT - 1) % FRAMES_COUNT;
     m_frames[m_currentFrameIndex].m_frameTimeStamp = std::chrono::system_clock::now();
     
     m_frames[m_currentFrameIndex].m_deltaTime = (std::chrono::duration_cast<std::chrono::milliseconds>(m_frames[m_lastFrameIndex].m_frameTimeStamp - m_frames[m_currentFrameIndex].m_frameTimeStamp)).count();
@@ -246,7 +247,7 @@ bool Renderer::beginFrame()
             m_buffers.m_meshletVisibility.buffer,
             m_buffers.m_meshletVisibilityBytes,
             VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT,
             VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT
         );
 
@@ -312,7 +313,7 @@ bool Renderer::beginFrame()
 
 void Renderer::drawCull(VkPipeline pipeline, uint32_t timestamp, const char *phase, bool late, unsigned int postPass)
 {
-    uint32_t rasterizationStage = VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT;
+    uint32_t rasterizationStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT;
 
     auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
 
@@ -556,9 +557,31 @@ void Renderer::draw()
         drawRender(/* late= */ true, m_colorClear, m_depthClear, 2, 14, "post render", /* postPass= */ 1);
     }
 
+
+    auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
+    VkImageMemoryBarrier2 blitBarriers[2 + GBUFFER_COUNT] = {
+        // note: even though the source image has previous state as undef, we need to specify COMPUTE_SHADER to synchronize with submitStageMask below
+        imageBarrier(m_gfxDevice.m_swapchain.images[m_imageIndex],
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL),
+        imageBarrier(m_depthTarget.image,
+            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_IMAGE_ASPECT_DEPTH_BIT)
+    };
+
+    for (uint32_t i = 0; i < GBUFFER_COUNT; ++i)
+        blitBarriers[i + 2] = imageBarrier(m_gbufferTargets[i].image,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, COUNTOF(blitBarriers), blitBarriers);
+
+
+    printf("should be replaced by raytracing \n");
+
     // should be replaced by raytracing
     {
-        auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
 
         VkImageMemoryBarrier2 dummyBarrier =
             imageBarrier(m_shadowTarget.image,
@@ -574,7 +597,6 @@ void Renderer::draw()
     }
 
     {
-        auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].m_commandBuffer;
         uint32_t timestamp = 19;
 
         vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 0);
@@ -647,7 +669,6 @@ void Renderer::endFrame()
 
 bool Renderer::loadGLTFScene(std::string filename)
 {
-    // std::string filename = "../../../Documents/github/niagara_bistro/bistrox.gltf";
     if (!loadScene(m_geometry, m_materials, m_draws, m_texturePaths, m_animations, m_camera, m_sunDirection, filename.c_str(), true, false))
     {
         printf("Error: scene %s failed to load\n", filename.c_str());
