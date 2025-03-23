@@ -149,8 +149,6 @@ bool Renderer::beginFrame()
     
     printf("vkWaitForFences \n");
     VK_CHECK(vkWaitForFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].m_renderFence, VK_TRUE, ~0ull));
-    printf("vkResetFences \n");
-    VK_CHECK(vkResetFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].m_renderFence));
 
     m_frames[m_currentFrameIndex].m_frameTimeStamp = std::chrono::system_clock::now();
     
@@ -215,8 +213,10 @@ bool Renderer::beginFrame()
     VkResult acquireResult = vkAcquireNextImageKHR(m_gfxDevice.m_device, m_gfxDevice.m_swapchain.swapchain, ~0ull, m_frames[m_currentFrameIndex].m_waitSemaphore, VK_NULL_HANDLE, &m_imageIndex);
     if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR)
         return false; // attempting to render to an out-of-date swapchain would break semaphore synchronization
-    VK_CHECK_SWAPCHAIN(acquireResult);
-
+        
+    printf("vkResetFences \n");
+    VK_CHECK(vkResetFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].m_renderFence));
+    
     VK_CHECK(vkResetCommandPool(m_gfxDevice.m_device, m_frames[m_currentFrameIndex].m_commandPool, 0));
 
     VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
