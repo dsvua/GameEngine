@@ -87,14 +87,14 @@ GfxDevice initDevice()
 	printf("Creating SDL window\n");
     // TODO:
     // Add version to window title.
-    result.window = SDL_CreateWindow(
+    result.m_window = SDL_CreateWindow(
         "Game",
         // size
         1024,
         768,
         SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 
-    if (!result.window) {
+    if (!result.m_window) {
         printf("Failed to create window. SDL Error: %s\n", SDL_GetError());
         std::exit(1);
     }
@@ -146,7 +146,7 @@ GfxDevice initDevice()
 
 	volkLoadDevice(result.device);
 
-	result.surface = createSurface(result.instance, result.window);
+	result.surface = createSurface(result.instance, result.m_window);
 	assert(result.surface);
 
 	VkBool32 presentSupported = 0;
@@ -158,7 +158,7 @@ GfxDevice initDevice()
 
 	vkGetPhysicalDeviceMemoryProperties(result.physicalDevice, &result.memoryProperties);
 
-	createSwapchain(result.swapchain, result.physicalDevice, result.device, result.surface, result.familyIndex, result.window, result.swapchainFormat);
+	createSwapchain(result.swapchain, result.physicalDevice, result.device, result.surface, result.familyIndex, result.m_window, result.swapchainFormat);
 
     return result;
 }
