@@ -34,6 +34,7 @@ Renderer::Renderer()
     m_gfxDevice.m_gbufferInfo.colorAttachmentCount = GBUFFER_COUNT;
 	m_gfxDevice.m_gbufferInfo.pColorAttachmentFormats = m_gbufferFormats;
 	m_gfxDevice.m_gbufferInfo.depthAttachmentFormat = m_gfxDevice.m_depthFormat;
+    printf("Setting depth format to: %d\n", m_gfxDevice.m_depthFormat);
 
     createBuffer(m_buffers.m_scratch, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, 128 * 1024 * 1024, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
@@ -721,7 +722,7 @@ bool Renderer::loadGLTFScene(std::string filename)
 	// printf("Loaded %d textures (%.2f MB) in %.2f sec\n", int(m_images.size()), double(m_imageMemory) / 1e6, glfwGetTime() - imageTimer);
 
 	uint32_t descriptorCount = uint32_t(m_texturePaths.size() + 1);
-	std::pair<VkDescriptorPool, VkDescriptorSet> textureSet = createDescriptorArray(m_gfxDevice.m_device, m_textureSetLayout, descriptorCount);
+	m_textureSet = createDescriptorArray(m_gfxDevice.m_device, m_textureSetLayout, descriptorCount);
 
 	for (size_t i = 0; i < m_texturePaths.size(); ++i)
 	{
@@ -730,7 +731,7 @@ bool Renderer::loadGLTFScene(std::string filename)
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 		VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-		write.dstSet = textureSet.second;
+		write.dstSet = m_textureSet.second;
 		write.dstBinding = 0;
 		write.dstArrayElement = uint32_t(i + 1);
 		write.descriptorCount = 1;
