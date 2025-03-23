@@ -2,7 +2,7 @@
 
 ## Build Commands
 - Build project: `./build.sh`
-- Run AIGameEngine: `./run.sh`
+- Run GameEngine: `./run.sh`
 - Always change directory into `./bin` if you want to run `./GameEngine` directly
 - Compile shaders only: `cmake --build build --target compile_shaders`
 
