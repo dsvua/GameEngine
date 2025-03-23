@@ -286,9 +286,9 @@ VkDevice createDevice(VkInstance instance, VkPhysicalDevice physicalDevice, uint
 	VK_CHECK(vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.data()));
 
 	printf("Available device extensions (%d):\n", extensionCount);
-	for (const auto& ext : availableExtensions) {
-		printf("  - %s (version %u)\n", ext.extensionName, ext.specVersion);
-	}
+	// for (const auto& ext : availableExtensions) {
+	// 	printf("  - %s (version %u)\n", ext.extensionName, ext.specVersion);
+	// }
 
 	// Add push descriptor extension if supported
 	if (pushDescriptorSupported) {

@@ -14,6 +14,11 @@
 Renderer::Renderer()
 {
     m_gfxDevice = initDevice();
+    m_gfxDevice.m_gbufferInfo.colorAttachmentCount = GBUFFER_COUNT;
+	m_gfxDevice.m_gbufferInfo.pColorAttachmentFormats = m_gbufferFormats;
+	m_gfxDevice.m_gbufferInfo.depthAttachmentFormat = m_gfxDevice.m_depthFormat;
+    printf("Setting depth format to: %d\n", m_gfxDevice.m_depthFormat);
+
     createPrograms();
     createPipelines();
     createFramesData();
@@ -28,13 +33,7 @@ Renderer::Renderer()
 	m_materials.resize(1);
 	m_materials[0].diffuseFactor = vec4(1);
 
-
     m_sunDirection = normalize(vec3(1.0f, 1.0f, 1.0f));
-
-    m_gfxDevice.m_gbufferInfo.colorAttachmentCount = GBUFFER_COUNT;
-	m_gfxDevice.m_gbufferInfo.pColorAttachmentFormats = m_gbufferFormats;
-	m_gfxDevice.m_gbufferInfo.depthAttachmentFormat = m_gfxDevice.m_depthFormat;
-    printf("Setting depth format to: %d\n", m_gfxDevice.m_depthFormat);
 
     createBuffer(m_buffers.m_scratch, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, 128 * 1024 * 1024, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
