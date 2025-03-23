@@ -6,97 +6,97 @@
 #include "niagara/resources.h"
 #include <chrono>
 
-static const size_t gbufferCount = 2UL;
+static const size_t GBUFFER_COUNT = 2UL;
 
 struct FrameData {
-    VkSemaphore waitSemaphore, signalSemaphore;
-    VkFence renderFence;
-	std::chrono::_V2::system_clock::time_point frameTimeStamp;
-	int64_t deltaTime; // number of milliseconds
+    VkSemaphore m_waitSemaphore, m_signalSemaphore;
+    VkFence m_renderFence;
+	std::chrono::_V2::system_clock::time_point m_frameTimeStamp;
+	int64_t m_deltaTime; // number of milliseconds
 
-    VkCommandPool commandPool;
-    VkCommandBuffer commandBuffer;
+    VkCommandPool m_commandPool;
+    VkCommandBuffer m_commandBuffer;
 };
 
 struct Pipelines {
-	VkPipeline debugtextPipeline = 0;
-	VkPipeline drawcullPipeline = 0;
-	VkPipeline drawculllatePipeline = 0;
-	VkPipeline taskcullPipeline = 0;
-	VkPipeline taskculllatePipeline = 0;
-	VkPipeline tasksubmitPipeline = 0;
-	VkPipeline clustersubmitPipeline = 0;
-	VkPipeline clustercullPipeline = 0;
-	VkPipeline clusterculllatePipeline = 0;
-	VkPipeline depthreducePipeline = 0;
-	VkPipeline meshPipeline = 0;
-	VkPipeline meshpostPipeline = 0;
-	VkPipeline meshtaskPipeline = 0;
-	VkPipeline meshtasklatePipeline = 0;
-	VkPipeline meshtaskpostPipeline = 0;
-	VkPipeline clusterPipeline = 0;
-	VkPipeline clusterpostPipeline = 0;
-	VkPipeline blitPipeline = 0;
-	VkPipeline finalPipeline = 0;
-	VkPipeline shadowlqPipeline = 0;
-	VkPipeline shadowhqPipeline = 0;
-	VkPipeline shadowfillPipeline = 0;
-	VkPipeline shadowblurPipeline = 0;
+	VkPipeline m_debugtextPipeline = 0;
+	VkPipeline m_drawcullPipeline = 0;
+	VkPipeline m_drawculllatePipeline = 0;
+	VkPipeline m_taskcullPipeline = 0;
+	VkPipeline m_taskculllatePipeline = 0;
+	VkPipeline m_tasksubmitPipeline = 0;
+	VkPipeline m_clustersubmitPipeline = 0;
+	VkPipeline m_clustercullPipeline = 0;
+	VkPipeline m_clusterculllatePipeline = 0;
+	VkPipeline m_depthreducePipeline = 0;
+	VkPipeline m_meshPipeline = 0;
+	VkPipeline m_meshpostPipeline = 0;
+	VkPipeline m_meshtaskPipeline = 0;
+	VkPipeline m_meshtasklatePipeline = 0;
+	VkPipeline m_meshtaskpostPipeline = 0;
+	VkPipeline m_clusterPipeline = 0;
+	VkPipeline m_clusterpostPipeline = 0;
+	VkPipeline m_blitPipeline = 0;
+	VkPipeline m_finalPipeline = 0;
+	VkPipeline m_shadowlqPipeline = 0;
+	VkPipeline m_shadowhqPipeline = 0;
+	VkPipeline m_shadowfillPipeline = 0;
+	VkPipeline m_shadowblurPipeline = 0;
 
-	std::vector<VkPipeline> pipelines;
-    VkPipelineCache pipelineCache = 0;
+	std::vector<VkPipeline> m_pipelines;
+    VkPipelineCache m_pipelineCache = 0;
 };
 
 struct Programs {
-	Program debugtextProgram = {};
-	Program drawcullProgram = {};
-	Program tasksubmitProgram = {};
-	Program clustersubmitProgram = {};
-	Program clustercullProgram = {};
-	Program depthreduceProgram = {};
-	Program meshProgram = {};
-	Program meshtaskProgram = {};
-	Program clusterProgram = {};
-	Program finalProgram = {};
-	Program shadowProgram = {};
-	Program shadowfillProgram = {};
-	Program shadowblurProgram = {};
+	Program m_debugtextProgram = {};
+	Program m_drawcullProgram = {};
+	Program m_tasksubmitProgram = {};
+	Program m_clustersubmitProgram = {};
+	Program m_clustercullProgram = {};
+	Program m_depthreduceProgram = {};
+	Program m_meshProgram = {};
+	Program m_meshtaskProgram = {};
+	Program m_clusterProgram = {};
+	Program m_finalProgram = {};
+	Program m_shadowProgram = {};
+	Program m_shadowfillProgram = {};
+	Program m_shadowblurProgram = {};
 };
 
 struct Samplers {
-    VkSampler textureSampler;
-    VkSampler readSampler;
-    VkSampler depthSampler;
+    VkSampler m_textureSampler;
+    VkSampler m_readSampler;
+    VkSampler m_depthSampler;
 };
 
 struct Buffers {
-	Buffer scratch = {};
-	Buffer meshesh = {}; // mb
-	Buffer materials = {}; // mtb
-	Buffer vertices = {}; // vb
-	Buffer indices = {}; // ib
-	Buffer meshlets = {}; // mlb
-	Buffer meshletdata = {}; // mdb
-	Buffer draw = {}; // db
-	Buffer DrawVisibility = {}; // dvb
-	Buffer TaskCommands = {}; // dcb
-	Buffer CommandCount = {}; // dccb
-	Buffer MeshletVisibility = {}; // mvb
-	Buffer blasBuffer = {};
-	Buffer tlasBuffer = {};
-	Buffer tlasScratchBuffer = {};
-	Buffer tlasInstanceBuffer = {};
-	VkAccelerationStructureKHR tlas = nullptr;
-	bool DrawVisibilityCleared = false;
-	bool MeshletVisibilityCleared = false;
-	uint32_t meshletVisibilityBytes;
+	Buffer m_scratch = {};
+	Buffer m_meshesh = {}; // mb
+	Buffer m_materials = {}; // mtb
+	Buffer m_vertices = {}; // vb
+	Buffer m_indices = {}; // ib
+	Buffer m_meshlets = {}; // mlb
+	Buffer m_meshletdata = {}; // mdb
+	Buffer m_draw = {}; // db
+	Buffer m_drawVisibility = {}; // dvb (also fixed capitalization)
+	Buffer m_taskCommands = {}; // dcb (also fixed capitalization)
+	Buffer m_commandCount = {}; // dccb (also fixed capitalization)
+	Buffer m_meshletVisibility = {}; // mvb (also fixed capitalization)
+	Buffer m_blasBuffer = {};
+	Buffer m_tlasBuffer = {};
+	Buffer m_tlasScratchBuffer = {};
+	Buffer m_tlasInstanceBuffer = {};
+	VkAccelerationStructureKHR m_tlas = nullptr;
+	bool m_drawVisibilityCleared = false; // also fixed capitalization
+	bool m_meshletVisibilityCleared = false; // also fixed capitalization
+	uint32_t m_meshletVisibilityBytes;
 };
 
 struct Timestamps {
-	std::chrono::_V2::system_clock::time_point frameTimestamp;
-	std::chrono::_V2::system_clock::time_point frameCpuBegin;
-	std::chrono::_V2::system_clock::time_point frameGpuBegin;
-	std::chrono::_V2::system_clock::time_point frameGpuEnd;
+	std::chrono::_V2::system_clock::time_point m_frameTimestamp;
+	std::chrono::_V2::system_clock::time_point m_frameCpuBegin;
+	std::chrono::_V2::system_clock::time_point m_frameGpuBegin;
+	std::chrono::_V2::system_clock::time_point m_frameGpuEnd;
 };
 
 class Renderer
@@ -133,12 +133,12 @@ public:
 	std::vector<Animation> m_animations;
 	std::vector<std::string> m_texturePaths;
 
-	const VkFormat m_gbufferFormats[gbufferCount] = {
+	const VkFormat m_gbufferFormats[GBUFFER_COUNT] = {
 		VK_FORMAT_R8G8B8A8_UNORM,
 		VK_FORMAT_A2B10G10R10_UNORM_PACK32,
 	};
 
-	Image m_gbufferTargets[gbufferCount] = {};
+	Image m_gbufferTargets[GBUFFER_COUNT] = {};
 	Image m_depthTarget = {};
 	Image m_shadowTarget = {};
 	Image m_shadowblurTarget = {};

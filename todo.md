@@ -19,92 +19,92 @@
 - [x] Rename `swapchainImageViews` to `m_swapchainImageViews`
 
 ### Renderer.h - FrameData Struct
-- [ ] Rename `waitSemaphore` to `m_waitSemaphore`
-- [ ] Rename `signalSemaphore` to `m_signalSemaphore`
-- [ ] Rename `renderFence` to `m_renderFence`
-- [ ] Rename `frameTimeStamp` to `m_frameTimeStamp`
-- [ ] Rename `deltaTime` to `m_deltaTime`
-- [ ] Rename `commandPool` to `m_commandPool`
-- [ ] Rename `commandBuffer` to `m_commandBuffer`
+- [x] Rename `waitSemaphore` to `m_waitSemaphore`
+- [x] Rename `signalSemaphore` to `m_signalSemaphore`
+- [x] Rename `renderFence` to `m_renderFence`
+- [x] Rename `frameTimeStamp` to `m_frameTimeStamp`
+- [x] Rename `deltaTime` to `m_deltaTime`
+- [x] Rename `commandPool` to `m_commandPool`
+- [x] Rename `commandBuffer` to `m_commandBuffer`
 
 ### Renderer.h - Pipelines Struct
-- [ ] Rename `debugtextPipeline` to `m_debugtextPipeline`
-- [ ] Rename `drawcullPipeline` to `m_drawcullPipeline`
-- [ ] Rename `drawculllatePipeline` to `m_drawculllatePipeline`
-- [ ] Rename `taskcullPipeline` to `m_taskcullPipeline`
-- [ ] Rename `taskculllatePipeline` to `m_taskculllatePipeline`
-- [ ] Rename `tasksubmitPipeline` to `m_tasksubmitPipeline`
-- [ ] Rename `clustersubmitPipeline` to `m_clustersubmitPipeline`
-- [ ] Rename `clustercullPipeline` to `m_clustercullPipeline`
-- [ ] Rename `clusterculllatePipeline` to `m_clusterculllatePipeline`
-- [ ] Rename `depthreducePipeline` to `m_depthreducePipeline`
-- [ ] Rename `meshPipeline` to `m_meshPipeline`
-- [ ] Rename `meshpostPipeline` to `m_meshpostPipeline`
-- [ ] Rename `meshtaskPipeline` to `m_meshtaskPipeline`
-- [ ] Rename `meshtasklatePipeline` to `m_meshtasklatePipeline`
-- [ ] Rename `meshtaskpostPipeline` to `m_meshtaskpostPipeline`
-- [ ] Rename `clusterPipeline` to `m_clusterPipeline`
-- [ ] Rename `clusterpostPipeline` to `m_clusterpostPipeline`
-- [ ] Rename `blitPipeline` to `m_blitPipeline`
-- [ ] Rename `finalPipeline` to `m_finalPipeline`
-- [ ] Rename `shadowlqPipeline` to `m_shadowlqPipeline`
-- [ ] Rename `shadowhqPipeline` to `m_shadowhqPipeline`
-- [ ] Rename `shadowfillPipeline` to `m_shadowfillPipeline`
-- [ ] Rename `shadowblurPipeline` to `m_shadowblurPipeline`
-- [ ] Rename `pipelines` to `m_pipelines`
-- [ ] Rename `pipelineCache` to `m_pipelineCache`
+- [x] Rename `debugtextPipeline` to `m_debugtextPipeline`
+- [x] Rename `drawcullPipeline` to `m_drawcullPipeline`
+- [x] Rename `drawculllatePipeline` to `m_drawculllatePipeline`
+- [x] Rename `taskcullPipeline` to `m_taskcullPipeline`
+- [x] Rename `taskculllatePipeline` to `m_taskculllatePipeline`
+- [x] Rename `tasksubmitPipeline` to `m_tasksubmitPipeline`
+- [x] Rename `clustersubmitPipeline` to `m_clustersubmitPipeline`
+- [x] Rename `clustercullPipeline` to `m_clustercullPipeline`
+- [x] Rename `clusterculllatePipeline` to `m_clusterculllatePipeline`
+- [x] Rename `depthreducePipeline` to `m_depthreducePipeline`
+- [x] Rename `meshPipeline` to `m_meshPipeline`
+- [x] Rename `meshpostPipeline` to `m_meshpostPipeline`
+- [x] Rename `meshtaskPipeline` to `m_meshtaskPipeline`
+- [x] Rename `meshtasklatePipeline` to `m_meshtasklatePipeline`
+- [x] Rename `meshtaskpostPipeline` to `m_meshtaskpostPipeline`
+- [x] Rename `clusterPipeline` to `m_clusterPipeline`
+- [x] Rename `clusterpostPipeline` to `m_clusterpostPipeline`
+- [x] Rename `blitPipeline` to `m_blitPipeline`
+- [x] Rename `finalPipeline` to `m_finalPipeline`
+- [x] Rename `shadowlqPipeline` to `m_shadowlqPipeline`
+- [x] Rename `shadowhqPipeline` to `m_shadowhqPipeline`
+- [x] Rename `shadowfillPipeline` to `m_shadowfillPipeline`
+- [x] Rename `shadowblurPipeline` to `m_shadowblurPipeline`
+- [x] Rename `pipelines` to `m_pipelines`
+- [x] Rename `pipelineCache` to `m_pipelineCache`
 
 ### Renderer.h - Programs Struct
-- [ ] Rename `debugtextProgram` to `m_debugtextProgram`
-- [ ] Rename `drawcullProgram` to `m_drawcullProgram`
-- [ ] Rename `tasksubmitProgram` to `m_tasksubmitProgram`
-- [ ] Rename `clustersubmitProgram` to `m_clustersubmitProgram`
-- [ ] Rename `clustercullProgram` to `m_clustercullProgram`
-- [ ] Rename `depthreduceProgram` to `m_depthreduceProgram`
-- [ ] Rename `meshProgram` to `m_meshProgram`
-- [ ] Rename `meshtaskProgram` to `m_meshtaskProgram`
-- [ ] Rename `clusterProgram` to `m_clusterProgram`
-- [ ] Rename `finalProgram` to `m_finalProgram`
-- [ ] Rename `shadowProgram` to `m_shadowProgram`
-- [ ] Rename `shadowfillProgram` to `m_shadowfillProgram`
-- [ ] Rename `shadowblurProgram` to `m_shadowblurProgram`
+- [x] Rename `debugtextProgram` to `m_debugtextProgram`
+- [x] Rename `drawcullProgram` to `m_drawcullProgram`
+- [x] Rename `tasksubmitProgram` to `m_tasksubmitProgram`
+- [x] Rename `clustersubmitProgram` to `m_clustersubmitProgram`
+- [x] Rename `clustercullProgram` to `m_clustercullProgram`
+- [x] Rename `depthreduceProgram` to `m_depthreduceProgram`
+- [x] Rename `meshProgram` to `m_meshProgram`
+- [x] Rename `meshtaskProgram` to `m_meshtaskProgram`
+- [x] Rename `clusterProgram` to `m_clusterProgram`
+- [x] Rename `finalProgram` to `m_finalProgram`
+- [x] Rename `shadowProgram` to `m_shadowProgram`
+- [x] Rename `shadowfillProgram` to `m_shadowfillProgram`
+- [x] Rename `shadowblurProgram` to `m_shadowblurProgram`
 
 ### Renderer.h - Samplers Struct
-- [ ] Rename `textureSampler` to `m_textureSampler`
-- [ ] Rename `readSampler` to `m_readSampler`
-- [ ] Rename `depthSampler` to `m_depthSampler`
+- [x] Rename `textureSampler` to `m_textureSampler`
+- [x] Rename `readSampler` to `m_readSampler`
+- [x] Rename `depthSampler` to `m_depthSampler`
 
 ### Renderer.h - Buffers Struct
-- [ ] Rename `scratch` to `m_scratch`
-- [ ] Rename `meshesh` to `m_meshesh`
-- [ ] Rename `materials` to `m_materials`
-- [ ] Rename `vertices` to `m_vertices`
-- [ ] Rename `indices` to `m_indices`
-- [ ] Rename `meshlets` to `m_meshlets`
-- [ ] Rename `meshletdata` to `m_meshletdata`
-- [ ] Rename `draw` to `m_draw`
-- [ ] Rename `DrawVisibility` to `m_drawVisibility` (also fix capitalization)
-- [ ] Rename `TaskCommands` to `m_taskCommands` (also fix capitalization)
-- [ ] Rename `CommandCount` to `m_commandCount` (also fix capitalization)
-- [ ] Rename `MeshletVisibility` to `m_meshletVisibility` (also fix capitalization)
-- [ ] Rename `blasBuffer` to `m_blasBuffer`
-- [ ] Rename `tlasBuffer` to `m_tlasBuffer`
-- [ ] Rename `tlasScratchBuffer` to `m_tlasScratchBuffer`
-- [ ] Rename `tlasInstanceBuffer` to `m_tlasInstanceBuffer`
-- [ ] Rename `tlas` to `m_tlas`
-- [ ] Rename `DrawVisibilityCleared` to `m_drawVisibilityCleared` (also fix capitalization)
-- [ ] Rename `MeshletVisibilityCleared` to `m_meshletVisibilityCleared` (also fix capitalization)
-- [ ] Rename `meshletVisibilityBytes` to `m_meshletVisibilityBytes`
+- [x] Rename `scratch` to `m_scratch`
+- [x] Rename `meshesh` to `m_meshesh`
+- [x] Rename `materials` to `m_materials`
+- [x] Rename `vertices` to `m_vertices`
+- [x] Rename `indices` to `m_indices`
+- [x] Rename `meshlets` to `m_meshlets`
+- [x] Rename `meshletdata` to `m_meshletdata`
+- [x] Rename `draw` to `m_draw`
+- [x] Rename `DrawVisibility` to `m_drawVisibility` (also fix capitalization)
+- [x] Rename `TaskCommands` to `m_taskCommands` (also fix capitalization)
+- [x] Rename `CommandCount` to `m_commandCount` (also fix capitalization)
+- [x] Rename `MeshletVisibility` to `m_meshletVisibility` (also fix capitalization)
+- [x] Rename `blasBuffer` to `m_blasBuffer`
+- [x] Rename `tlasBuffer` to `m_tlasBuffer`
+- [x] Rename `tlasScratchBuffer` to `m_tlasScratchBuffer`
+- [x] Rename `tlasInstanceBuffer` to `m_tlasInstanceBuffer`
+- [x] Rename `tlas` to `m_tlas`
+- [x] Rename `DrawVisibilityCleared` to `m_drawVisibilityCleared` (also fix capitalization)
+- [x] Rename `MeshletVisibilityCleared` to `m_meshletVisibilityCleared` (also fix capitalization)
+- [x] Rename `meshletVisibilityBytes` to `m_meshletVisibilityBytes`
 
 ### Renderer.h - Timestamps Struct
-- [ ] Rename `frameTimestamp` to `m_frameTimestamp`
-- [ ] Rename `frameCpuBegin` to `m_frameCpuBegin`
-- [ ] Rename `frameGpuBegin` to `m_frameGpuBegin`
-- [ ] Rename `frameGpuEnd` to `m_frameGpuEnd`
+- [x] Rename `frameTimestamp` to `m_frameTimestamp`
+- [x] Rename `frameCpuBegin` to `m_frameCpuBegin`
+- [x] Rename `frameGpuBegin` to `m_frameGpuBegin`
+- [x] Rename `frameGpuEnd` to `m_frameGpuEnd`
 
 ## Constants and Macro Naming (UPPER_CASE)
 
-- [ ] Rename `gbufferCount` to `GBUFFER_COUNT` in Renderer.h (line 9)
+- [x] Rename `gbufferCount` to `GBUFFER_COUNT` in Renderer.h (line 9)
 - [ ] Check codebase for any other non-uppercased constants/macros
 
 ## Variable and Function Naming (camelCase)
@@ -123,7 +123,7 @@
 
 ### Update Related References
 - [ ] Update all references to the renamed functions and variables in main.cpp
-- [ ] Update all references to the renamed functions and variables in Renderer.cpp
+- [x] Update all references to the renamed functions and variables in Renderer.cpp
 - [ ] Check all other files for references to renamed identifiers
 
 ## Indentation Consistency (4 spaces, no tabs)
