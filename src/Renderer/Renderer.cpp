@@ -1127,12 +1127,12 @@ void Renderer::cleanup()
         vkDestroySemaphore(m_gfxDevice.device, m_frames[i].waitSemaphore, 0);
     }
 
-	vkDestroySurfaceKHR(m_gfxDevice.instance, m_gfxDevice.surface, 0);
+	vkDestroySurfaceKHR(m_gfxDevice.m_instance, m_gfxDevice.surface, 0);
 
 
 	vkDestroyDevice(m_gfxDevice.device, 0);
 
-	vkDestroyInstance(m_gfxDevice.instance, 0);
+	vkDestroyInstance(m_gfxDevice.m_instance, 0);
 
 	volkFinalize();
 }

@@ -100,18 +100,18 @@ GfxDevice initDevice()
     }
 
 	printf("Creating instance\n");
-	result.instance = createInstance();
-	assert(result.instance);
+	result.m_instance = createInstance();
+	assert(result.m_instance);
 
 	printf("Volk load instance\n");
-	volkLoadInstanceOnly(result.instance);
+	volkLoadInstanceOnly(result.m_instance);
 
 	printf("Registering debug callback\n");
-	result.debugCallback = registerDebugCallback(result.instance);
-	registerDebugCallback(result.instance);
+	result.debugCallback = registerDebugCallback(result.m_instance);
+	registerDebugCallback(result.m_instance);
 	VkPhysicalDevice physicalDevices[16];
 	uint32_t physicalDeviceCount = sizeof(physicalDevices) / sizeof(physicalDevices[0]);
-	VK_CHECK(vkEnumeratePhysicalDevices(result.instance, &physicalDeviceCount, physicalDevices));
+	VK_CHECK(vkEnumeratePhysicalDevices(result.m_instance, &physicalDeviceCount, physicalDevices));
 
 	printf("Selecting physical device\n");
 	result.m_physicalDevice = pickPhysicalDevice(physicalDevices, physicalDeviceCount);
@@ -141,12 +141,12 @@ GfxDevice initDevice()
 	result.familyIndex = getGraphicsFamilyIndex(result.m_physicalDevice);
 	assert(result.familyIndex != VK_QUEUE_FAMILY_IGNORED);
 
-	result.device = createDevice(result.instance, result.m_physicalDevice, result.familyIndex, meshShadingSupported, raytracingSupported);
+	result.device = createDevice(result.m_instance, result.m_physicalDevice, result.familyIndex, meshShadingSupported, raytracingSupported);
 	assert(result.device);
 
 	volkLoadDevice(result.device);
 
-	result.surface = createSurface(result.instance, result.m_window);
+	result.surface = createSurface(result.m_instance, result.m_window);
 	assert(result.surface);
 
 	VkBool32 presentSupported = 0;
