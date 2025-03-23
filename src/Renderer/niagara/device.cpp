@@ -246,6 +246,22 @@ VkPhysicalDevice pickPhysicalDevice(VkPhysicalDevice* physicalDevices, uint32_t 
 	return result;
 }
 
+// Function to check if extension is supported
+static bool isExtensionSupported(VkPhysicalDevice physicalDevice, const char* extensionName) {
+    uint32_t extensionCount = 0;
+    VK_CHECK(vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr));
+
+    std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+    VK_CHECK(vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.data()));
+
+    for (const auto& extension : availableExtensions) {
+        if (strcmp(extension.extensionName, extensionName) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 VkDevice createDevice(VkInstance instance, VkPhysicalDevice physicalDevice, uint32_t familyIndex, bool meshShadingSupported, bool raytracingSupported)
 {
 	float queuePriorities[] = { 1.0f };
@@ -257,13 +273,49 @@ VkDevice createDevice(VkInstance instance, VkPhysicalDevice physicalDevice, uint
 
 	std::vector<const char*> extensions = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+		VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
 	};
 
-	if (meshShadingSupported)
+	// Check if push descriptor is supported
+	bool pushDescriptorSupported = isExtensionSupported(physicalDevice, VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
+
+	// List all available extensions
+	uint32_t extensionCount = 0;
+	VK_CHECK(vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr));
+	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+	VK_CHECK(vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.data()));
+
+	printf("Available device extensions (%d):\n", extensionCount);
+	for (const auto& ext : availableExtensions) {
+		printf("  - %s (version %u)\n", ext.extensionName, ext.specVersion);
+	}
+
+	// Add push descriptor extension if supported
+	if (pushDescriptorSupported) {
+		printf("Push descriptor extension is supported and will be enabled\n");
+		extensions.push_back(VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
+	} else {
+		printf("ERROR: Push descriptor extension is NOT supported by the device but required by the application!\n");
+		// In a real application, you might want to have a fallback path
+		// For now, we'll continue and let it fail more gracefully
+	}
+
+	// Let's print out the extensions we're enabling
+	printf("Enabling device extensions:\n");
+	for (const char* ext : extensions) {
+		printf("  - %s\n", ext);
+	}
+
+	if (meshShadingSupported) {
+		printf("  - %s\n", VK_EXT_MESH_SHADER_EXTENSION_NAME);
 		extensions.push_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
+	}
 
 	if (raytracingSupported)
 	{
+		printf("  - %s\n", VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
+		printf("  - %s\n", VK_KHR_RAY_QUERY_EXTENSION_NAME);
+		printf("  - %s\n", VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
 		extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
 		extensions.push_back(VK_KHR_RAY_QUERY_EXTENSION_NAME);
 		extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
