@@ -34,5 +34,6 @@
 build
 src/assets
 bin
+external
 
 .qodo
