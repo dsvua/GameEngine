@@ -114,14 +114,14 @@ GfxDevice initDevice()
 	VK_CHECK(vkEnumeratePhysicalDevices(result.instance, &physicalDeviceCount, physicalDevices));
 
 	printf("Selecting physical device\n");
-	result.physicalDevice = pickPhysicalDevice(physicalDevices, physicalDeviceCount);
-	assert(result.physicalDevice);
+	result.m_physicalDevice = pickPhysicalDevice(physicalDevices, physicalDeviceCount);
+	assert(result.m_physicalDevice);
 
 	uint32_t extensionCount = 0;
-	VK_CHECK(vkEnumerateDeviceExtensionProperties(result.physicalDevice, 0, &extensionCount, 0));
+	VK_CHECK(vkEnumerateDeviceExtensionProperties(result.m_physicalDevice, 0, &extensionCount, 0));
 
 	std::vector<VkExtensionProperties> extensions(extensionCount);
-	VK_CHECK(vkEnumerateDeviceExtensionProperties(result.physicalDevice, 0, &extensionCount, extensions.data()));
+	VK_CHECK(vkEnumerateDeviceExtensionProperties(result.m_physicalDevice, 0, &extensionCount, extensions.data()));
 
 	bool meshShadingSupported = false;
 	bool raytracingSupported = false;
@@ -135,13 +135,13 @@ GfxDevice initDevice()
     assert(meshShadingSupported);
     assert(raytracingSupported);
 
-	vkGetPhysicalDeviceProperties(result.physicalDevice, &result.props);
+	vkGetPhysicalDeviceProperties(result.m_physicalDevice, &result.props);
 	assert(result.props.limits.timestampComputeAndGraphics);
 
-	result.familyIndex = getGraphicsFamilyIndex(result.physicalDevice);
+	result.familyIndex = getGraphicsFamilyIndex(result.m_physicalDevice);
 	assert(result.familyIndex != VK_QUEUE_FAMILY_IGNORED);
 
-	result.device = createDevice(result.instance, result.physicalDevice, result.familyIndex, meshShadingSupported, raytracingSupported);
+	result.device = createDevice(result.instance, result.m_physicalDevice, result.familyIndex, meshShadingSupported, raytracingSupported);
 	assert(result.device);
 
 	volkLoadDevice(result.device);
@@ -150,15 +150,15 @@ GfxDevice initDevice()
 	assert(result.surface);
 
 	VkBool32 presentSupported = 0;
-	VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(result.physicalDevice, result.familyIndex, result.surface, &presentSupported));
+	VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(result.m_physicalDevice, result.familyIndex, result.surface, &presentSupported));
 	assert(presentSupported);
 
-	result.swapchainFormat = getSwapchainFormat(result.physicalDevice, result.surface);
+	result.swapchainFormat = getSwapchainFormat(result.m_physicalDevice, result.surface);
 	result.depthFormat = VK_FORMAT_D32_SFLOAT;
 
-	vkGetPhysicalDeviceMemoryProperties(result.physicalDevice, &result.memoryProperties);
+	vkGetPhysicalDeviceMemoryProperties(result.m_physicalDevice, &result.memoryProperties);
 
-	createSwapchain(result.swapchain, result.physicalDevice, result.device, result.surface, result.familyIndex, result.m_window, result.swapchainFormat);
+	createSwapchain(result.swapchain, result.m_physicalDevice, result.device, result.surface, result.familyIndex, result.m_window, result.swapchainFormat);
 
     return result;
 }

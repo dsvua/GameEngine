@@ -10,7 +10,7 @@ struct DescriptorInfo;
 
 struct GfxDevice {
     SDL_Window * m_window;
-    VkPhysicalDevice physicalDevice;
+    VkPhysicalDevice m_physicalDevice;
 	VkInstance instance;
     VkPipelineRenderingCreateInfo gbufferInfo = { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
     VkPhysicalDeviceMemoryProperties memoryProperties;

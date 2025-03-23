@@ -224,7 +224,7 @@ bool Renderer::beginFrame()
     
     m_frames[m_currentFrameIndex].deltaTime = (std::chrono::duration_cast<std::chrono::milliseconds>(m_frames[m_lastFrameIndex].frameTimeStamp - m_frames[m_currentFrameIndex].frameTimeStamp)).count();
 
-    SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.swapchain, m_gfxDevice.physicalDevice, m_gfxDevice.device, m_gfxDevice.surface, m_gfxDevice.familyIndex, m_gfxDevice.m_window, m_gfxDevice.swapchainFormat);
+    SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.swapchain, m_gfxDevice.m_physicalDevice, m_gfxDevice.device, m_gfxDevice.surface, m_gfxDevice.familyIndex, m_gfxDevice.m_window, m_gfxDevice.swapchainFormat);
 
     if (swapchainStatus == Swapchain_NotReady)
         return false;

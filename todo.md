@@ -4,7 +4,7 @@
 
 ### GfxDevice.h
 - [x] Rename `window` to `m_window`
-- [ ] Rename `physicalDevice` to `m_physicalDevice`
+- [x] Rename `physicalDevice` to `m_physicalDevice`
 - [ ] Rename `instance` to `m_instance`
 - [ ] Rename `gbufferInfo` to `m_gbufferInfo`
 - [ ] Rename `memoryProperties` to `m_memoryProperties`
