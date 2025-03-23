@@ -147,7 +147,7 @@ bool Renderer::beginFrame()
     m_currentFrameIndex = m_frameIndex % FRAMES_COUNT;
     m_lastFrameIndex = (m_frameIndex + FRAMES_COUNT - 1) % FRAMES_COUNT;
     
-    printf("vkWaitForFences \n");
+    // printf("vkWaitForFences \n");
     VK_CHECK(vkWaitForFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].m_renderFence, VK_TRUE, ~0ull));
 
     m_frames[m_currentFrameIndex].m_frameTimeStamp = std::chrono::system_clock::now();
@@ -213,8 +213,8 @@ bool Renderer::beginFrame()
     VkResult acquireResult = vkAcquireNextImageKHR(m_gfxDevice.m_device, m_gfxDevice.m_swapchain.swapchain, ~0ull, m_frames[m_currentFrameIndex].m_waitSemaphore, VK_NULL_HANDLE, &m_imageIndex);
     if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR)
         return false; // attempting to render to an out-of-date swapchain would break semaphore synchronization
-        
-    printf("vkResetFences \n");
+
+    // printf("vkResetFences \n");
     VK_CHECK(vkResetFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].m_renderFence));
     
     VK_CHECK(vkResetCommandPool(m_gfxDevice.m_device, m_frames[m_currentFrameIndex].m_commandPool, 0));
@@ -376,16 +376,16 @@ void Renderer::drawCull(VkPipeline pipeline, uint32_t timestamp, const char *pha
         DescriptorInfo pyramidDesc(m_samplers.m_depthSampler, m_depthPyramid.imageView, VK_IMAGE_LAYOUT_GENERAL);
         DescriptorInfo descriptors[] = { m_buffers.m_draw.buffer, m_buffers.m_meshesh.buffer, m_buffers.m_taskCommands.buffer, m_buffers.m_commandCount.buffer, m_buffers.m_drawVisibility.buffer, pyramidDesc };
 
-        printf("dispatch %lu \n", m_draws.size());
+        // printf("dispatch %lu \n", m_draws.size());
         dispatch(commandBuffer, m_programs.m_drawcullProgram, uint32_t(m_draws.size()), 1, passData, descriptors);
-        printf("dispatch completed \n");
+        // printf("dispatch completed \n");
     }
 
     VkBufferMemoryBarrier2 syncBarrier = bufferBarrier(m_buffers.m_commandCount.buffer,
         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT,
         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
 
-    printf("pipelineBarrier \n");
+    // printf("pipelineBarrier \n");
     pipelineBarrier(commandBuffer, 0, 1, &syncBarrier, 0, nullptr);
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipelines.m_tasksubmitPipeline);
@@ -393,7 +393,7 @@ void Renderer::drawCull(VkPipeline pipeline, uint32_t timestamp, const char *pha
     DescriptorInfo descriptors[] = { m_buffers.m_commandCount.buffer, m_buffers.m_taskCommands.buffer };
     vkCmdPushDescriptorSetWithTemplate(commandBuffer, m_programs.m_tasksubmitProgram.updateTemplate, m_programs.m_tasksubmitProgram.layout, 0, descriptors);
 
-    printf("vkCmdDispatch \n");
+    // printf("vkCmdDispatch \n");
     vkCmdDispatch(commandBuffer, 1, 1, 1);
 
     VkBufferMemoryBarrier2 cullBarriers[] = {
@@ -405,7 +405,7 @@ void Renderer::drawCull(VkPipeline pipeline, uint32_t timestamp, const char *pha
             VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT, VK_ACCESS_INDIRECT_COMMAND_READ_BIT),
     };
 
-    printf("pipelineBarrier \n");
+    // printf("pipelineBarrier \n");
     pipelineBarrier(commandBuffer, 0, COUNTOF(cullBarriers), cullBarriers, 0, nullptr);
 
     vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
@@ -548,7 +548,7 @@ void Renderer::draw()
 {
     // at the beginning we are checking if resolution changed
     // and should skip this cycle until swapchain is good.
-    printf("beginFrame \n");
+    // printf("beginFrame \n");
     if (!beginFrame())
     {
         printf("Something wrong with beginFrame \n");
@@ -560,26 +560,26 @@ void Renderer::draw()
     m_camera.update(deltaTimeSeconds);
 
     
-    printf("drawCull \n");
+    // printf("drawCull \n");
     drawCull(m_pipelines.m_taskcullPipeline, 2, "early cull", /* late= */ false);
     // drawCull(m_pipelines.drawcullPipeline, 2, "early cull", /* late= */ false);
-    printf("drawRender \n");
+    // printf("drawRender \n");
     drawRender(/* late= */ false, m_colorClear, m_depthClear, 0, 4, "early render");
-    printf("drawPyramid \n");
+    // printf("drawPyramid \n");
     drawPyramid(6);
-    printf("drawCull \n");
+    // printf("drawCull \n");
     drawCull(m_pipelines.m_taskculllatePipeline, 8, "late cull", /* late= */ true);
-    printf("drawRender \n");
+    // printf("drawRender \n");
     drawRender(/* late= */ true, m_colorClear, m_depthClear, 1, 10, "late render");
 
     if (m_meshPostPasses >> 1)
     {
         // post cull: frustum + occlusion cull & fill extra objects
-        printf(" \n");
+        // printf(" \n");
         drawCull(m_pipelines.m_taskculllatePipeline , 12, "post cull", /* late= */ true, /* postPass= */ 1);
 
         // post render: render extra objects
-        printf(" \n");
+        // printf(" \n");
         drawRender(/* late= */ true, m_colorClear, m_depthClear, 2, 14, "post render", /* postPass= */ 1);
     }
 
@@ -604,7 +604,7 @@ void Renderer::draw()
     pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, COUNTOF(blitBarriers), blitBarriers);
 
 
-    printf("should be replaced by raytracing \n");
+    // printf("should be replaced by raytracing \n");
 
     // should be replaced by raytracing
     {
@@ -650,7 +650,7 @@ void Renderer::draw()
 
     // drawDebug();
 
-    printf("endFrame \n");
+    // printf("endFrame \n");
     endFrame();
 }
 
