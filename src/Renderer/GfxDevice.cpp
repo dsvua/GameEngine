@@ -141,10 +141,10 @@ GfxDevice initDevice()
 	result.m_familyIndex = getGraphicsFamilyIndex(result.m_physicalDevice);
 	assert(result.m_familyIndex != VK_QUEUE_FAMILY_IGNORED);
 
-	result.device = createDevice(result.m_instance, result.m_physicalDevice, result.m_familyIndex, meshShadingSupported, raytracingSupported);
-	assert(result.device);
+	result.m_device = createDevice(result.m_instance, result.m_physicalDevice, result.m_familyIndex, meshShadingSupported, raytracingSupported);
+	assert(result.m_device);
 
-	volkLoadDevice(result.device);
+	volkLoadDevice(result.m_device);
 
 	result.surface = createSurface(result.m_instance, result.m_window);
 	assert(result.surface);
@@ -158,7 +158,7 @@ GfxDevice initDevice()
 
 	vkGetPhysicalDeviceMemoryProperties(result.m_physicalDevice, &result.m_memoryProperties);
 
-	createSwapchain(result.swapchain, result.m_physicalDevice, result.device, result.surface, result.m_familyIndex, result.m_window, result.swapchainFormat);
+	createSwapchain(result.swapchain, result.m_physicalDevice, result.m_device, result.surface, result.m_familyIndex, result.m_window, result.swapchainFormat);
 
     return result;
 }

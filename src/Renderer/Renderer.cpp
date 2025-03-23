@@ -89,7 +89,7 @@ Renderer::Renderer()
     createPrograms();
     createPipelines();
     createFramesData();
-    vkGetDeviceQueue(m_gfxDevice.device, m_gfxDevice.m_familyIndex, 0, &m_queue);
+    vkGetDeviceQueue(m_gfxDevice.m_device, m_gfxDevice.m_familyIndex, 0, &m_queue);
 
     m_camera.position = { 0.0f, 0.0f, 0.0f };
 	m_camera.orientation = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -107,7 +107,7 @@ Renderer::Renderer()
 	m_gfxDevice.m_gbufferInfo.pColorAttachmentFormats = m_gbufferFormats;
 	m_gfxDevice.m_gbufferInfo.depthAttachmentFormat = m_gfxDevice.depthFormat;
 
-    createBuffer(m_buffers.scratch, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, 128 * 1024 * 1024, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    createBuffer(m_buffers.scratch, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, 128 * 1024 * 1024, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     loadGLTFScene("../../../Documents/github/niagara_bistro/bistrox.gltf");
 }
@@ -117,16 +117,16 @@ void Renderer::createPrograms()
 	bool rcs = loadShaders(m_shaders, "", "shaders/");
 	assert(rcs);
 
-    m_textureSetLayout = createDescriptorArrayLayout(m_gfxDevice.device);
+    m_textureSetLayout = createDescriptorArrayLayout(m_gfxDevice.m_device);
     m_pipelines.pipelineCache = 0;
 
-    m_programs.drawcullProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["drawcull.comp"] }, sizeof(CullData));
-    m_programs.tasksubmitProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["tasksubmit.comp"] }, 0);
-    m_programs.clustersubmitProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["clustersubmit.comp"] }, 0);
-    m_programs.clustercullProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["clustercull.comp"] }, sizeof(CullData));
-    m_programs.depthreduceProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["depthreduce.comp"] }, sizeof(vec4));
-    m_programs.meshtaskProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_GRAPHICS, { &m_shaders["meshlet.task"], &m_shaders["meshlet.mesh"], &m_shaders["mesh.frag"] }, sizeof(Globals), m_textureSetLayout);
-    m_programs.finalProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["final.comp"] }, sizeof(ShadeData));
+    m_programs.drawcullProgram = createProgram(m_gfxDevice.m_device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["drawcull.comp"] }, sizeof(CullData));
+    m_programs.tasksubmitProgram = createProgram(m_gfxDevice.m_device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["tasksubmit.comp"] }, 0);
+    m_programs.clustersubmitProgram = createProgram(m_gfxDevice.m_device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["clustersubmit.comp"] }, 0);
+    m_programs.clustercullProgram = createProgram(m_gfxDevice.m_device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["clustercull.comp"] }, sizeof(CullData));
+    m_programs.depthreduceProgram = createProgram(m_gfxDevice.m_device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["depthreduce.comp"] }, sizeof(vec4));
+    m_programs.meshtaskProgram = createProgram(m_gfxDevice.m_device, VK_PIPELINE_BIND_POINT_GRAPHICS, { &m_shaders["meshlet.task"], &m_shaders["meshlet.mesh"], &m_shaders["mesh.frag"] }, sizeof(Globals), m_textureSetLayout);
+    m_programs.finalProgram = createProgram(m_gfxDevice.m_device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["final.comp"] }, sizeof(ShadeData));
 }
 
 void Renderer::createPipelines()
@@ -134,7 +134,7 @@ void Renderer::createPipelines()
     auto replace = [&](VkPipeline& pipeline, VkPipeline newPipeline)
     {
         if (pipeline)
-            vkDestroyPipeline(m_gfxDevice.device, pipeline, 0);
+            vkDestroyPipeline(m_gfxDevice.m_device, pipeline, 0);
         assert(newPipeline);
         pipeline = newPipeline;
         m_pipelines.pipelines.push_back(newPipeline);
@@ -142,27 +142,27 @@ void Renderer::createPipelines()
 
     m_pipelines.pipelines.clear();
 
-    replace(m_pipelines.taskcullPipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.drawcullProgram, { /* LATE= */ false, /* TASK= */ true }));
-    replace(m_pipelines.taskculllatePipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.drawcullProgram, { /* LATE= */ true, /* TASK= */ true }));
+    replace(m_pipelines.taskcullPipeline, createComputePipeline(m_gfxDevice.m_device, m_pipelines.pipelineCache, m_programs.drawcullProgram, { /* LATE= */ false, /* TASK= */ true }));
+    replace(m_pipelines.taskculllatePipeline, createComputePipeline(m_gfxDevice.m_device, m_pipelines.pipelineCache, m_programs.drawcullProgram, { /* LATE= */ true, /* TASK= */ true }));
 
-    replace(m_pipelines.tasksubmitPipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.tasksubmitProgram));
+    replace(m_pipelines.tasksubmitPipeline, createComputePipeline(m_gfxDevice.m_device, m_pipelines.pipelineCache, m_programs.tasksubmitProgram));
 
-    replace(m_pipelines.depthreducePipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.depthreduceProgram));
+    replace(m_pipelines.depthreducePipeline, createComputePipeline(m_gfxDevice.m_device, m_pipelines.pipelineCache, m_programs.depthreduceProgram));
 
-    replace(m_pipelines.meshtaskPipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ false, /* TASK= */ true }));
-    replace(m_pipelines.meshtasklatePipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true }));
-    replace(m_pipelines.meshtaskpostPipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true, /* POST= */ 1 }));
+    replace(m_pipelines.meshtaskPipeline, createGraphicsPipeline(m_gfxDevice.m_device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ false, /* TASK= */ true }));
+    replace(m_pipelines.meshtasklatePipeline, createGraphicsPipeline(m_gfxDevice.m_device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true }));
+    replace(m_pipelines.meshtaskpostPipeline, createGraphicsPipeline(m_gfxDevice.m_device, m_pipelines.pipelineCache, m_gfxDevice.m_gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true, /* POST= */ 1 }));
 
-    replace(m_pipelines.finalPipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.finalProgram));
+    replace(m_pipelines.finalPipeline, createComputePipeline(m_gfxDevice.m_device, m_pipelines.pipelineCache, m_programs.finalProgram));
 
 }
 
 void Renderer::createFramesData()
 {
-    m_queryPoolTimestamp = createQueryPool(m_gfxDevice.device, 128, VK_QUERY_TYPE_TIMESTAMP);
+    m_queryPoolTimestamp = createQueryPool(m_gfxDevice.m_device, 128, VK_QUERY_TYPE_TIMESTAMP);
 	assert(m_queryPoolTimestamp);
 
-	m_queryPoolPipeline = createQueryPool(m_gfxDevice.device, 4, VK_QUERY_TYPE_PIPELINE_STATISTICS);
+	m_queryPoolPipeline = createQueryPool(m_gfxDevice.m_device, 4, VK_QUERY_TYPE_PIPELINE_STATISTICS);
 	assert(m_queryPoolPipeline);
 
     m_gfxDevice.swapchainImageViews.resize(m_gfxDevice.swapchain.imageCount);
@@ -170,7 +170,7 @@ void Renderer::createFramesData()
     for (int i = 0; i < FRAMES_COUNT; i++)
     {
 
-        m_frames[i].commandPool = createCommandPool(m_gfxDevice.device, m_gfxDevice.m_familyIndex);
+        m_frames[i].commandPool = createCommandPool(m_gfxDevice.m_device, m_gfxDevice.m_familyIndex);
         assert(m_frames[i].commandPool);
 
         VkCommandBufferAllocateInfo allocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
@@ -179,34 +179,34 @@ void Renderer::createFramesData()
         allocateInfo.commandBufferCount = 1;
     
         m_frames[i].commandBuffer = 0;
-        VK_CHECK(vkAllocateCommandBuffers(m_gfxDevice.device, &allocateInfo, &m_frames[i].commandBuffer));
+        VK_CHECK(vkAllocateCommandBuffers(m_gfxDevice.m_device, &allocateInfo, &m_frames[i].commandBuffer));
 
-        m_frames[i].waitSemaphore = createSemaphore(m_gfxDevice.device); // acquireSemaphore
+        m_frames[i].waitSemaphore = createSemaphore(m_gfxDevice.m_device); // acquireSemaphore
         assert(m_frames[i].waitSemaphore);
     
-        m_frames[i].signalSemaphore = createSemaphore(m_gfxDevice.device); // releaseSemaphore
+        m_frames[i].signalSemaphore = createSemaphore(m_gfxDevice.m_device); // releaseSemaphore
         assert(m_frames[i].signalSemaphore);
 
-        m_frames[i].renderFence = createFence(m_gfxDevice.device); // frameFence
+        m_frames[i].renderFence = createFence(m_gfxDevice.m_device); // frameFence
         assert(m_frames[i].renderFence);
-        // VK_CHECK(vkResetFences(m_gfxDevice.device, 1, &m_frames[i].renderFence));
+        // VK_CHECK(vkResetFences(m_gfxDevice.m_device, 1, &m_frames[i].renderFence));
 
     }
 
-    m_immCommandPool = createCommandPool(m_gfxDevice.device, m_gfxDevice.m_familyIndex);
+    m_immCommandPool = createCommandPool(m_gfxDevice.m_device, m_gfxDevice.m_familyIndex);
     VkCommandBufferAllocateInfo allocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
     allocateInfo.commandPool = m_immCommandPool;
     allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocateInfo.commandBufferCount = 1;
-    VK_CHECK(vkAllocateCommandBuffers(m_gfxDevice.device, &allocateInfo, &m_immCommandBuffer));
+    VK_CHECK(vkAllocateCommandBuffers(m_gfxDevice.m_device, &allocateInfo, &m_immCommandBuffer));
 
-	m_samplers.textureSampler = createSampler(m_gfxDevice.device, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT);
+	m_samplers.textureSampler = createSampler(m_gfxDevice.m_device, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT);
 	assert(m_samplers.textureSampler);
 
-	m_samplers.readSampler = createSampler(m_gfxDevice.device, VK_FILTER_NEAREST, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+	m_samplers.readSampler = createSampler(m_gfxDevice.m_device, VK_FILTER_NEAREST, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
 	assert(m_samplers.readSampler);
 
-	m_samplers.depthSampler = createSampler(m_gfxDevice.device, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_REDUCTION_MODE_MIN);
+	m_samplers.depthSampler = createSampler(m_gfxDevice.m_device, VK_FILTER_LINEAR, VK_SAMPLER_MIPMAP_MODE_NEAREST, VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE, VK_SAMPLER_REDUCTION_MODE_MIN);
 	assert(m_samplers.depthSampler);
 
 }
@@ -214,9 +214,9 @@ void Renderer::createFramesData()
 bool Renderer::beginFrame()
 {
     printf("vkWaitForFences \n");
-    VK_CHECK(vkWaitForFences(m_gfxDevice.device, 1, &m_frames[m_currentFrameIndex].renderFence, VK_TRUE, ~0ull));
+    VK_CHECK(vkWaitForFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].renderFence, VK_TRUE, ~0ull));
     printf("vkResetFences \n");
-    VK_CHECK(vkResetFences(m_gfxDevice.device, 1, &m_frames[m_currentFrameIndex].renderFence));
+    VK_CHECK(vkResetFences(m_gfxDevice.m_device, 1, &m_frames[m_currentFrameIndex].renderFence));
 
     m_currentFrameIndex = m_frameIndex % FRAMES_COUNT;
     m_lastFrameIndex = (m_frameIndex + FRAMES_COUNT - 1) % FRAMES_COUNT;
@@ -224,7 +224,7 @@ bool Renderer::beginFrame()
     
     m_frames[m_currentFrameIndex].deltaTime = (std::chrono::duration_cast<std::chrono::milliseconds>(m_frames[m_lastFrameIndex].frameTimeStamp - m_frames[m_currentFrameIndex].frameTimeStamp)).count();
 
-    SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.swapchain, m_gfxDevice.m_physicalDevice, m_gfxDevice.device, m_gfxDevice.surface, m_gfxDevice.m_familyIndex, m_gfxDevice.m_window, m_gfxDevice.swapchainFormat);
+    SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.swapchain, m_gfxDevice.m_physicalDevice, m_gfxDevice.m_device, m_gfxDevice.surface, m_gfxDevice.m_familyIndex, m_gfxDevice.m_window, m_gfxDevice.swapchainFormat);
 
     if (swapchainStatus == Swapchain_NotReady)
         return false;
@@ -235,57 +235,57 @@ bool Renderer::beginFrame()
 
         for (Image& image : m_gbufferTargets)
             if (image.image)
-                destroyImage(image, m_gfxDevice.device);
+                destroyImage(image, m_gfxDevice.m_device);
         if (m_depthTarget.image)
-            destroyImage(m_depthTarget, m_gfxDevice.device);
+            destroyImage(m_depthTarget, m_gfxDevice.m_device);
 
         if (m_depthPyramid.image)
         {
             for (uint32_t i = 0; i < m_depthPyramidLevels; ++i)
-                vkDestroyImageView(m_gfxDevice.device, m_depthPyramidMips[i], 0);
-            destroyImage(m_depthPyramid, m_gfxDevice.device);
+                vkDestroyImageView(m_gfxDevice.m_device, m_depthPyramidMips[i], 0);
+            destroyImage(m_depthPyramid, m_gfxDevice.m_device);
         }
 
         if (m_shadowTarget.image)
-            destroyImage(m_shadowTarget, m_gfxDevice.device);
+            destroyImage(m_shadowTarget, m_gfxDevice.m_device);
         if (m_shadowblurTarget.image)
-            destroyImage(m_shadowblurTarget, m_gfxDevice.device);
+            destroyImage(m_shadowblurTarget, m_gfxDevice.m_device);
 
         for (uint32_t i = 0; i < gbufferCount; ++i)
-            createImage(m_gbufferTargets[i], m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gbufferFormats[i], VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-        createImage(m_depthTarget, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gfxDevice.depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+            createImage(m_gbufferTargets[i], m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gbufferFormats[i], VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_depthTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gfxDevice.depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-        createImage(m_shadowTarget, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-        createImage(m_shadowblurTarget, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_shadowTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_shadowblurTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
         // Note: previousPow2 makes sure all reductions are at most by 2x2 which makes sure they are conservative
         m_depthPyramidWidth = previousPow2(m_gfxDevice.swapchain.width);
         m_depthPyramidHeight = previousPow2(m_gfxDevice.swapchain.height);
         m_depthPyramidLevels = getImageMipLevels(m_depthPyramidWidth, m_depthPyramidHeight);
 
-        createImage(m_depthPyramid, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_depthPyramidWidth, m_depthPyramidHeight, m_depthPyramidLevels, VK_FORMAT_R32_SFLOAT, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+        createImage(m_depthPyramid, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_depthPyramidWidth, m_depthPyramidHeight, m_depthPyramidLevels, VK_FORMAT_R32_SFLOAT, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 
         for (uint32_t i = 0; i < m_depthPyramidLevels; ++i)
         {
-            m_depthPyramidMips[i] = createImageView(m_gfxDevice.device, m_depthPyramid.image, VK_FORMAT_R32_SFLOAT, i, 1);
+            m_depthPyramidMips[i] = createImageView(m_gfxDevice.m_device, m_depthPyramid.image, VK_FORMAT_R32_SFLOAT, i, 1);
             assert(m_depthPyramidMips[i]);
         }
 
         for (uint32_t i = 0; i < m_gfxDevice.swapchain.imageCount; ++i)
         {
             if (m_gfxDevice.swapchainImageViews[i])
-                vkDestroyImageView(m_gfxDevice.device, m_gfxDevice.swapchainImageViews[i], 0);
+                vkDestroyImageView(m_gfxDevice.m_device, m_gfxDevice.swapchainImageViews[i], 0);
 
-                m_gfxDevice.swapchainImageViews[i] = createImageView(m_gfxDevice.device, m_gfxDevice.swapchain.images[i], m_gfxDevice.swapchainFormat, 0, 1);
+                m_gfxDevice.swapchainImageViews[i] = createImageView(m_gfxDevice.m_device, m_gfxDevice.swapchain.images[i], m_gfxDevice.swapchainFormat, 0, 1);
         }
     }
 
-    VkResult acquireResult = vkAcquireNextImageKHR(m_gfxDevice.device, m_gfxDevice.swapchain.swapchain, ~0ull, m_frames[m_currentFrameIndex].waitSemaphore, VK_NULL_HANDLE, &m_imageIndex);
+    VkResult acquireResult = vkAcquireNextImageKHR(m_gfxDevice.m_device, m_gfxDevice.swapchain.swapchain, ~0ull, m_frames[m_currentFrameIndex].waitSemaphore, VK_NULL_HANDLE, &m_imageIndex);
     if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR)
         return false; // attempting to render to an out-of-date swapchain would break semaphore synchronization
     VK_CHECK_SWAPCHAIN(acquireResult);
 
-    VK_CHECK(vkResetCommandPool(m_gfxDevice.device, m_frames[m_currentFrameIndex].commandPool, 0));
+    VK_CHECK(vkResetCommandPool(m_gfxDevice.m_device, m_frames[m_currentFrameIndex].commandPool, 0));
 
     VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -328,7 +328,7 @@ bool Renderer::beginFrame()
 
     if (m_tlasNeedsRebuild)
     {
-        buildTLAS(m_gfxDevice.device, m_frames[m_currentFrameIndex].commandBuffer, m_buffers.tlas, m_buffers.tlasBuffer, m_buffers.tlasScratchBuffer, m_buffers.tlasInstanceBuffer, m_draws.size(), VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR);
+        buildTLAS(m_gfxDevice.m_device, m_frames[m_currentFrameIndex].commandBuffer, m_buffers.tlas, m_buffers.tlasBuffer, m_buffers.tlasScratchBuffer, m_buffers.tlasInstanceBuffer, m_draws.size(), VK_BUILD_ACCELERATION_STRUCTURE_MODE_BUILD_KHR);
         m_tlasNeedsRebuild = false;
     }
 
@@ -874,14 +874,14 @@ bool Renderer::loadGLTFScene(std::string filename)
 	for (size_t i = 0; i < m_texturePaths.size(); ++i)
 	{
 		Image image;
-		if (!loadDDSImage(image, m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties, m_buffers.scratch, m_texturePaths[i].c_str()))
+		if (!loadDDSImage(image, m_gfxDevice.m_device, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties, m_buffers.scratch, m_texturePaths[i].c_str()))
 		{
 			printf("Error: image N: %ld %s failed to load\n", i, m_texturePaths[i].c_str());
 			return 1;
 		}
 
 		// VkMemoryRequirements memoryRequirements = {};
-		// vkGetImageMemoryRequirements(m_gfxDevice.device, image.image, &memoryRequirements);
+		// vkGetImageMemoryRequirements(m_gfxDevice.m_device, image.image, &memoryRequirements);
 		// m_imageMemory += memoryRequirements.size;
 
 		m_images.push_back(image);
@@ -890,7 +890,7 @@ bool Renderer::loadGLTFScene(std::string filename)
 	// printf("Loaded %d textures (%.2f MB) in %.2f sec\n", int(m_images.size()), double(m_imageMemory) / 1e6, glfwGetTime() - imageTimer);
 
 	uint32_t descriptorCount = uint32_t(m_texturePaths.size() + 1);
-	std::pair<VkDescriptorPool, VkDescriptorSet> textureSet = createDescriptorArray(m_gfxDevice.device, m_textureSetLayout, descriptorCount);
+	std::pair<VkDescriptorPool, VkDescriptorSet> textureSet = createDescriptorArray(m_gfxDevice.m_device, m_textureSetLayout, descriptorCount);
 
 	for (size_t i = 0; i < m_texturePaths.size(); ++i)
 	{
@@ -906,7 +906,7 @@ bool Renderer::loadGLTFScene(std::string filename)
 		write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 		write.pImageInfo = &imageInfo;
 
-		vkUpdateDescriptorSets(m_gfxDevice.device, 1, &write, 0, nullptr);
+		vkUpdateDescriptorSets(m_gfxDevice.m_device, 1, &write, 0, nullptr);
 	}
 
     printf("Geometry: VB %.2f MB, IB %.2f MB, meshlets %.2f MB\n",
@@ -935,36 +935,36 @@ bool Renderer::loadGLTFScene(std::string filename)
 
     uint32_t raytracingBufferFlags = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 
-    createBuffer(m_buffers.meshesh, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.meshes.size() * sizeof(Mesh), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.materials, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_materials.size() * sizeof(Material), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.vertices, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | raytracingBufferFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.indices, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.indices.size() * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | raytracingBufferFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.meshlets, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.meshlets.size() * sizeof(Meshlet), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.meshletdata, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_geometry.meshletdata.size() * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.meshesh, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_geometry.meshes.size() * sizeof(Mesh), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.materials, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_materials.size() * sizeof(Material), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.vertices, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_geometry.vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | raytracingBufferFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.indices, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_geometry.indices.size() * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | raytracingBufferFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.meshlets, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_geometry.meshlets.size() * sizeof(Meshlet), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.meshletdata, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_geometry.meshletdata.size() * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshesh, m_buffers.scratch, m_geometry.meshes.data(), m_geometry.meshes.size() * sizeof(Mesh));
-    uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.materials, m_buffers.scratch, m_materials.data(), m_materials.size() * sizeof(Material));
+    uploadBuffer(m_gfxDevice.m_device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshesh, m_buffers.scratch, m_geometry.meshes.data(), m_geometry.meshes.size() * sizeof(Mesh));
+    uploadBuffer(m_gfxDevice.m_device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.materials, m_buffers.scratch, m_materials.data(), m_materials.size() * sizeof(Material));
 
-    uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.vertices, m_buffers.scratch, m_geometry.vertices.data(), m_geometry.vertices.size() * sizeof(Vertex));
-    uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.indices, m_buffers.scratch, m_geometry.indices.data(), m_geometry.indices.size() * sizeof(uint32_t));
+    uploadBuffer(m_gfxDevice.m_device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.vertices, m_buffers.scratch, m_geometry.vertices.data(), m_geometry.vertices.size() * sizeof(Vertex));
+    uploadBuffer(m_gfxDevice.m_device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.indices, m_buffers.scratch, m_geometry.indices.data(), m_geometry.indices.size() * sizeof(uint32_t));
 
-    uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshlets, m_buffers.scratch, m_geometry.meshlets.data(), m_geometry.meshlets.size() * sizeof(Meshlet));
-    uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshletdata, m_buffers.scratch, m_geometry.meshletdata.data(), m_geometry.meshletdata.size() * sizeof(uint32_t));
+    uploadBuffer(m_gfxDevice.m_device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshlets, m_buffers.scratch, m_geometry.meshlets.data(), m_geometry.meshlets.size() * sizeof(Meshlet));
+    uploadBuffer(m_gfxDevice.m_device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.meshletdata, m_buffers.scratch, m_geometry.meshletdata.data(), m_geometry.meshletdata.size() * sizeof(uint32_t));
 
-    createBuffer(m_buffers.draw, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_draws.size() * sizeof(MeshDraw), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    createBuffer(m_buffers.DrawVisibility, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_draws.size() * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.TaskCommands, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, TASK_WGLIMIT * sizeof(MeshTaskCommand), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    createBuffer(m_buffers.CommandCount, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.draw, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_draws.size() * sizeof(MeshDraw), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    createBuffer(m_buffers.DrawVisibility, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_draws.size() * sizeof(uint32_t), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.TaskCommands, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, TASK_WGLIMIT * sizeof(MeshTaskCommand), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.CommandCount, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     // TODO: there's a way to implement cluster visibility persistence *without* using bitwise storage at all, which may be beneficial on the balance, so we should try that.
     // *if* we do that, we can drop meshletVisibilityOffset et al from everywhere
-    createBuffer(m_buffers.MeshletVisibility, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, m_buffers.meshletVisibilityBytes, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    createBuffer(m_buffers.MeshletVisibility, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_buffers.meshletVisibilityBytes, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    uploadBuffer(m_gfxDevice.device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.draw, m_buffers.scratch, m_draws.data(), m_draws.size() * sizeof(MeshDraw));
+    uploadBuffer(m_gfxDevice.m_device, m_immCommandPool, m_immCommandBuffer, m_queue, m_buffers.draw, m_buffers.scratch, m_draws.data(), m_draws.size() * sizeof(MeshDraw));
 
     std::vector<VkDeviceSize> compactedSizes;
-    buildBLAS(m_gfxDevice.device, m_geometry.meshes, m_buffers.vertices, m_buffers.indices, m_blas, compactedSizes, m_buffers.blasBuffer, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties);
-    compactBLAS(m_gfxDevice.device, m_blas, compactedSizes, m_buffers.blasBuffer, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties);
+    buildBLAS(m_gfxDevice.m_device, m_geometry.meshes, m_buffers.vertices, m_buffers.indices, m_blas, compactedSizes, m_buffers.blasBuffer, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties);
+    compactBLAS(m_gfxDevice.m_device, m_blas, compactedSizes, m_buffers.blasBuffer, m_immCommandPool, m_immCommandBuffer, m_queue, m_gfxDevice.m_memoryProperties);
 
     m_blasAddresses.resize(m_blas.size());
 
@@ -973,10 +973,10 @@ bool Renderer::loadGLTFScene(std::string filename)
         VkAccelerationStructureDeviceAddressInfoKHR info = { VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_DEVICE_ADDRESS_INFO_KHR };
         info.accelerationStructure = m_blas[i];
 
-        m_blasAddresses[i] = vkGetAccelerationStructureDeviceAddressKHR(m_gfxDevice.device, &info);
+        m_blasAddresses[i] = vkGetAccelerationStructureDeviceAddressKHR(m_gfxDevice.m_device, &info);
     }
 
-    createBuffer(m_buffers.tlasInstanceBuffer, m_gfxDevice.device, m_gfxDevice.m_memoryProperties, sizeof(VkAccelerationStructureInstanceKHR) * m_draws.size(), VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    createBuffer(m_buffers.tlasInstanceBuffer, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, sizeof(VkAccelerationStructureInstanceKHR) * m_draws.size(), VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     for (size_t i = 0; i < m_draws.size(); ++i)
     {
@@ -989,7 +989,7 @@ bool Renderer::loadGLTFScene(std::string filename)
         memcpy(static_cast<VkAccelerationStructureInstanceKHR*>(m_buffers.tlasInstanceBuffer.data) + i, &instance, sizeof(VkAccelerationStructureInstanceKHR));
     }
 
-    m_buffers.tlas = createTLAS(m_gfxDevice.device, m_buffers.tlasBuffer, m_buffers.tlasScratchBuffer, m_buffers.tlasInstanceBuffer, m_draws.size(), m_gfxDevice.m_memoryProperties);
+    m_buffers.tlas = createTLAS(m_gfxDevice.m_device, m_buffers.tlasBuffer, m_buffers.tlasScratchBuffer, m_buffers.tlasInstanceBuffer, m_draws.size(), m_gfxDevice.m_memoryProperties);
 
     return true;
 }
@@ -1036,101 +1036,101 @@ void Renderer::endFrame()
 void Renderer::cleanup()
 {
     printf("Doing clenup of resources created by renderer\n");
-    vkDestroyDescriptorPool(m_gfxDevice.device, m_textureSet.first, 0);
+    vkDestroyDescriptorPool(m_gfxDevice.m_device, m_textureSet.first, 0);
 
 	for (Image& image : m_images)
-		destroyImage(image, m_gfxDevice.device);
+		destroyImage(image, m_gfxDevice.m_device);
 
 	for (Image& image : m_gbufferTargets)
 		if (image.image)
-			destroyImage(image, m_gfxDevice.device);
+			destroyImage(image, m_gfxDevice.m_device);
 	if (m_depthTarget.image)
-		destroyImage(m_depthTarget, m_gfxDevice.device);
+		destroyImage(m_depthTarget, m_gfxDevice.m_device);
 
 	if (m_depthPyramid.image)
 	{
 		for (uint32_t i = 0; i < m_depthPyramidLevels; ++i)
-			vkDestroyImageView(m_gfxDevice.device, m_depthPyramidMips[i], 0);
-		destroyImage(m_depthPyramid, m_gfxDevice.device);
+			vkDestroyImageView(m_gfxDevice.m_device, m_depthPyramidMips[i], 0);
+		destroyImage(m_depthPyramid, m_gfxDevice.m_device);
 	}
 
 	if (m_shadowTarget.image)
-		destroyImage(m_shadowTarget, m_gfxDevice.device);
+		destroyImage(m_shadowTarget, m_gfxDevice.m_device);
 	if (m_shadowblurTarget.image)
-		destroyImage(m_shadowblurTarget, m_gfxDevice.device);
+		destroyImage(m_shadowblurTarget, m_gfxDevice.m_device);
 
 	for (uint32_t i = 0; i < m_gfxDevice.swapchain.imageCount; ++i)
 		if (m_gfxDevice.swapchainImageViews[i])
-			vkDestroyImageView(m_gfxDevice.device, m_gfxDevice.swapchainImageViews[i], 0);
+			vkDestroyImageView(m_gfxDevice.m_device, m_gfxDevice.swapchainImageViews[i], 0);
 
-	destroyBuffer(m_buffers.meshesh, m_gfxDevice.device);
-	destroyBuffer(m_buffers.materials, m_gfxDevice.device);
-	destroyBuffer(m_buffers.draw, m_gfxDevice.device);
-	destroyBuffer(m_buffers.DrawVisibility, m_gfxDevice.device);
-	destroyBuffer(m_buffers.TaskCommands, m_gfxDevice.device);
-	destroyBuffer(m_buffers.CommandCount, m_gfxDevice.device);
-    destroyBuffer(m_buffers.meshlets, m_gfxDevice.device);
-    destroyBuffer(m_buffers.meshletdata, m_gfxDevice.device);
-    destroyBuffer(m_buffers.MeshletVisibility, m_gfxDevice.device);
-    destroyBuffer(m_buffers.tlasBuffer, m_gfxDevice.device);
-    destroyBuffer(m_buffers.blasBuffer, m_gfxDevice.device);
-    destroyBuffer(m_buffers.tlasScratchBuffer, m_gfxDevice.device);
-    destroyBuffer(m_buffers.tlasInstanceBuffer, m_gfxDevice.device);
-	destroyBuffer(m_buffers.indices, m_gfxDevice.device);
-	destroyBuffer(m_buffers.vertices, m_gfxDevice.device);
-	destroyBuffer(m_buffers.scratch, m_gfxDevice.device);
+	destroyBuffer(m_buffers.meshesh, m_gfxDevice.m_device);
+	destroyBuffer(m_buffers.materials, m_gfxDevice.m_device);
+	destroyBuffer(m_buffers.draw, m_gfxDevice.m_device);
+	destroyBuffer(m_buffers.DrawVisibility, m_gfxDevice.m_device);
+	destroyBuffer(m_buffers.TaskCommands, m_gfxDevice.m_device);
+	destroyBuffer(m_buffers.CommandCount, m_gfxDevice.m_device);
+    destroyBuffer(m_buffers.meshlets, m_gfxDevice.m_device);
+    destroyBuffer(m_buffers.meshletdata, m_gfxDevice.m_device);
+    destroyBuffer(m_buffers.MeshletVisibility, m_gfxDevice.m_device);
+    destroyBuffer(m_buffers.tlasBuffer, m_gfxDevice.m_device);
+    destroyBuffer(m_buffers.blasBuffer, m_gfxDevice.m_device);
+    destroyBuffer(m_buffers.tlasScratchBuffer, m_gfxDevice.m_device);
+    destroyBuffer(m_buffers.tlasInstanceBuffer, m_gfxDevice.m_device);
+	destroyBuffer(m_buffers.indices, m_gfxDevice.m_device);
+	destroyBuffer(m_buffers.vertices, m_gfxDevice.m_device);
+	destroyBuffer(m_buffers.scratch, m_gfxDevice.m_device);
 
-    vkDestroyAccelerationStructureKHR(m_gfxDevice.device, m_buffers.tlas, 0);
+    vkDestroyAccelerationStructureKHR(m_gfxDevice.m_device, m_buffers.tlas, 0);
     for (VkAccelerationStructureKHR as : m_blas)
-        vkDestroyAccelerationStructureKHR(m_gfxDevice.device, as, 0);
+        vkDestroyAccelerationStructureKHR(m_gfxDevice.m_device, as, 0);
 
     for (int i=0; i<FRAMES_COUNT; i++)
     {
-        vkDestroyCommandPool(m_gfxDevice.device, m_frames[i].commandPool, 0);
+        vkDestroyCommandPool(m_gfxDevice.m_device, m_frames[i].commandPool, 0);
     }
 
-	vkDestroyQueryPool(m_gfxDevice.device, m_queryPoolTimestamp, 0);
-	vkDestroyQueryPool(m_gfxDevice.device, m_queryPoolPipeline, 0);
+	vkDestroyQueryPool(m_gfxDevice.m_device, m_queryPoolTimestamp, 0);
+	vkDestroyQueryPool(m_gfxDevice.m_device, m_queryPoolPipeline, 0);
 
-	destroySwapchain(m_gfxDevice.device, m_gfxDevice.swapchain);
+	destroySwapchain(m_gfxDevice.m_device, m_gfxDevice.swapchain);
 
 	for (VkPipeline pipeline : m_pipelines.pipelines)
-		vkDestroyPipeline(m_gfxDevice.device, pipeline, 0);
+		vkDestroyPipeline(m_gfxDevice.m_device, pipeline, 0);
 
-	destroyProgram(m_gfxDevice.device, m_programs.debugtextProgram);
-	destroyProgram(m_gfxDevice.device, m_programs.drawcullProgram);
-	destroyProgram(m_gfxDevice.device, m_programs.tasksubmitProgram);
-	destroyProgram(m_gfxDevice.device, m_programs.clustersubmitProgram);
-	destroyProgram(m_gfxDevice.device, m_programs.clustercullProgram);
-	destroyProgram(m_gfxDevice.device, m_programs.depthreduceProgram);
-	destroyProgram(m_gfxDevice.device, m_programs.meshProgram);
+	destroyProgram(m_gfxDevice.m_device, m_programs.debugtextProgram);
+	destroyProgram(m_gfxDevice.m_device, m_programs.drawcullProgram);
+	destroyProgram(m_gfxDevice.m_device, m_programs.tasksubmitProgram);
+	destroyProgram(m_gfxDevice.m_device, m_programs.clustersubmitProgram);
+	destroyProgram(m_gfxDevice.m_device, m_programs.clustercullProgram);
+	destroyProgram(m_gfxDevice.m_device, m_programs.depthreduceProgram);
+	destroyProgram(m_gfxDevice.m_device, m_programs.meshProgram);
 
-    destroyProgram(m_gfxDevice.device, m_programs.meshtaskProgram);
-    destroyProgram(m_gfxDevice.device, m_programs.clusterProgram);
+    destroyProgram(m_gfxDevice.m_device, m_programs.meshtaskProgram);
+    destroyProgram(m_gfxDevice.m_device, m_programs.clusterProgram);
 
-	destroyProgram(m_gfxDevice.device, m_programs.finalProgram);
+	destroyProgram(m_gfxDevice.m_device, m_programs.finalProgram);
 
-    destroyProgram(m_gfxDevice.device, m_programs.shadowProgram);
-    destroyProgram(m_gfxDevice.device, m_programs.shadowfillProgram);
-    destroyProgram(m_gfxDevice.device, m_programs.shadowblurProgram);
+    destroyProgram(m_gfxDevice.m_device, m_programs.shadowProgram);
+    destroyProgram(m_gfxDevice.m_device, m_programs.shadowfillProgram);
+    destroyProgram(m_gfxDevice.m_device, m_programs.shadowblurProgram);
 
-	vkDestroyDescriptorSetLayout(m_gfxDevice.device, m_textureSetLayout, 0);
+	vkDestroyDescriptorSetLayout(m_gfxDevice.m_device, m_textureSetLayout, 0);
 
-	vkDestroySampler(m_gfxDevice.device, m_samplers.textureSampler, 0);
-	vkDestroySampler(m_gfxDevice.device, m_samplers.readSampler, 0);
-	vkDestroySampler(m_gfxDevice.device, m_samplers.depthSampler, 0);
+	vkDestroySampler(m_gfxDevice.m_device, m_samplers.textureSampler, 0);
+	vkDestroySampler(m_gfxDevice.m_device, m_samplers.readSampler, 0);
+	vkDestroySampler(m_gfxDevice.m_device, m_samplers.depthSampler, 0);
 
     for (int i=0; i<FRAMES_COUNT; i++)
     {
-        vkDestroyFence(m_gfxDevice.device, m_frames[i].renderFence, 0);
-        vkDestroySemaphore(m_gfxDevice.device, m_frames[i].signalSemaphore, 0);
-        vkDestroySemaphore(m_gfxDevice.device, m_frames[i].waitSemaphore, 0);
+        vkDestroyFence(m_gfxDevice.m_device, m_frames[i].renderFence, 0);
+        vkDestroySemaphore(m_gfxDevice.m_device, m_frames[i].signalSemaphore, 0);
+        vkDestroySemaphore(m_gfxDevice.m_device, m_frames[i].waitSemaphore, 0);
     }
 
 	vkDestroySurfaceKHR(m_gfxDevice.m_instance, m_gfxDevice.surface, 0);
 
 
-	vkDestroyDevice(m_gfxDevice.device, 0);
+	vkDestroyDevice(m_gfxDevice.m_device, 0);
 
 	vkDestroyInstance(m_gfxDevice.m_instance, 0);
 

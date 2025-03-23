@@ -15,7 +15,7 @@ struct GfxDevice {
     VkPipelineRenderingCreateInfo m_gbufferInfo = { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
     VkPhysicalDeviceMemoryProperties m_memoryProperties;
     uint32_t m_familyIndex;
-    VkDevice device;
+    VkDevice m_device;
     VkSurfaceKHR surface;
     Swapchain swapchain;
 	VkFormat swapchainFormat;

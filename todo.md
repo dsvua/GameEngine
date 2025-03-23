@@ -9,7 +9,7 @@
 - [x] Rename `gbufferInfo` to `m_gbufferInfo`
 - [x] Rename `memoryProperties` to `m_memoryProperties`
 - [x] Rename `familyIndex` to `m_familyIndex`
-- [ ] Rename `device` to `m_device`
+- [x] Rename `device` to `m_device`
 - [ ] Rename `surface` to `m_surface`
 - [ ] Rename `swapchain` to `m_swapchain`
 - [ ] Rename `swapchainFormat` to `m_swapchainFormat`
