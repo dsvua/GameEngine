@@ -457,7 +457,7 @@ void Renderer::drawCull(VkPipeline pipeline, uint32_t timestamp, const char *pha
         // printf("passData.clusterBackfaceEnabled %i \n", passData.clusterBackfaceEnabled);
         // printf("passData.postPass %d \n", passData.postPass);
 
-        printf("dispatch %u \n", m_draws.size());
+        printf("dispatch %lu \n", m_draws.size());
         dispatch(commandBuffer, m_programs.drawcullProgram, uint32_t(m_draws.size()), 1, passData, descriptors);
         printf("dispatch completed \n");
     }
