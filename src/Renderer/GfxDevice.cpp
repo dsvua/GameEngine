@@ -1,4 +1,5 @@
 #include "GfxDevice.h"
+#include "RendererUtils.h"
 
 #include "niagara/shaders.h"
 #include "niagara/device.h"
@@ -58,20 +59,6 @@ VkQueryPool createQueryPool(VkDevice device, uint32_t queryCount, VkQueryType qu
 	return queryPool;
 }
 
-template <typename PushConstants, size_t PushDescriptors>
-void dispatch(VkCommandBuffer commandBuffer, const Program& program, uint32_t threadCountX, uint32_t threadCountY, const PushConstants& pushConstants, const DescriptorInfo (&pushDescriptors)[PushDescriptors])
-{
-	assert(program.pushConstantSize == sizeof(pushConstants));
-	assert(program.pushDescriptorCount == PushDescriptors);
-
-	if (program.pushConstantStages)
-		vkCmdPushConstants(commandBuffer, program.layout, program.pushConstantStages, 0, sizeof(pushConstants), &pushConstants);
-
-	if (program.pushDescriptorCount)
-		vkCmdPushDescriptorSetWithTemplateKHR(commandBuffer, program.updateTemplate, program.layout, 0, pushDescriptors);
-
-	vkCmdDispatch(commandBuffer, getGroupCount(threadCountX, program.localSizeX), getGroupCount(threadCountY, program.localSizeY), 1);
-}
 
 GfxDevice initDevice()
 {
