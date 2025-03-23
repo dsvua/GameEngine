@@ -157,8 +157,8 @@
 
 ## Documentation 
 
-- [ ] Verify all function declarations have docstring comments
-- [ ] Add missing docstring comments to functions in Renderer.h and GfxDevice.h
+- [x] Verify all function declarations have docstring comments
+- [x] Add missing docstring comments to functions in Renderer.h and GfxDevice.h
 
 ## Line Length (under 120 characters)
 

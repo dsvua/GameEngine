@@ -27,16 +27,52 @@ struct GfxDevice {
 
 };
 
+/**
+ * Creates a Vulkan semaphore for synchronization operations.
+ * @param device The Vulkan device to create the semaphore on
+ * @return The created semaphore handle
+ */
 VkSemaphore createSemaphore(VkDevice device);
 
+/**
+ * Creates a Vulkan fence for CPU-GPU synchronization.
+ * @param device The Vulkan device to create the fence on
+ * @return The created fence handle with signaled state
+ */
 VkFence createFence(VkDevice device);
 
+/**
+ * Creates a command pool for allocating command buffers.
+ * @param device The Vulkan device to create the command pool on
+ * @param familyIndex The graphics queue family index
+ * @return The created command pool with transient flag
+ */
 VkCommandPool createCommandPool(VkDevice device, uint32_t familyIndex);
 
+/**
+ * Creates a query pool for collecting performance data.
+ * @param device The Vulkan device to create the query pool on
+ * @param queryCount Number of queries in the pool
+ * @param queryType Type of query (timestamp or pipeline statistics)
+ * @return The created query pool handle
+ */
 VkQueryPool createQueryPool(VkDevice device, uint32_t queryCount, VkQueryType queryType);
 
+/**
+ * Destroys the SDL window used for rendering.
+ * @param window Pointer to the SDL window to destroy
+ */
 void destroyGfxWindow(SDL_Window * window);
 
+/**
+ * Initializes the graphics device and Vulkan context.
+ * Creates window, instance, physical device, logical device, and swapchain.
+ * @return Initialized GfxDevice structure
+ */
 GfxDevice initDevice();
 
+/**
+ * Checks if application should quit by polling SDL events.
+ * @return True if quit event received, false otherwise
+ */
 bool shouldQuit();

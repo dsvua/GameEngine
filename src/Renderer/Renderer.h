@@ -102,6 +102,10 @@ struct Timestamps {
 class Renderer
 {
 public:
+    /**
+     * Initializes the renderer with default settings.
+     * Creates the graphics device, shaders, pipelines, and frame data.
+     */
     Renderer();
     GfxDevice m_gfxDevice;
     FrameData m_frames[FRAMES_COUNT];
@@ -167,20 +171,99 @@ public:
 	VkAccelerationStructureKHR m_tlas = nullptr;
 	bool m_tlasNeedsRebuild = true;
 
+    /**
+     * Creates shader programs used in the renderer.
+     * Initializes compute and graphics shader combinations.
+     */
     void createPrograms();
+    
+    /**
+     * Creates rendering pipelines for all render passes.
+     * Sets up pipeline state and shader bindings.
+     */
     void createPipelines();
+    
+    /**
+     * Creates per-frame data structures for multi-buffered rendering.
+     * Initializes semaphores, fences, and command buffers.
+     */
     void createFramesData();
 
+    /**
+     * Begins a new frame for rendering.
+     * Acquires next swapchain image and prepares command buffers.
+     * @return True if frame setup was successful, false otherwise
+     */
 	bool beginFrame();
+	
+	/**
+     * Performs visibility culling for mesh draws.
+     * @param pipeline The culling pipeline to use
+     * @param timestamp Query index for performance timing
+     * @param phase Debug name for the culling phase
+     * @param late Whether this is late culling (after main render)
+     * @param postPass Post-processing pass index
+     */
 	void drawCull(VkPipeline pipeline, uint32_t timestamp, const char* phase, bool late, unsigned int postPass = 0);
+    
+    /**
+     * Renders the scene with current visibility data.
+     * @param late Whether this is late rendering (after main render)
+     * @param colorClear Color value used for clearing color attachments
+     * @param depthClear Depth value used for clearing depth attachment
+     * @param query Query index for pipeline statistics
+     * @param timestamp Query index for performance timing
+     * @param phase Debug name for the render phase
+     * @param postPass Post-processing pass index
+     */
     void drawRender(bool late, const VkClearColorValue& colorClear, const VkClearDepthStencilValue& depthClear, uint32_t query, uint32_t timestamp, const char* phase, unsigned int postPass = 0);
+    
+    /**
+     * Generates mip chain for depth pyramid used in hierarchical Z-buffer.
+     * @param timestamp Query index for performance timing
+     */
     void drawPyramid(uint32_t timestamp);
+    
+    /**
+     * Renders debug visualization overlays.
+     * Displays performance statistics and debug information.
+     */
 	void drawDebug();
+	
+	/**
+     * Renders shadow maps for the scene.
+     * Handles shadow cascades and filtering.
+     */
 	void drawShadow();
+	
+	/**
+     * Main draw function that renders a complete frame.
+     * Orchestrates the entire rendering pipeline.
+     */
 	void draw();
+	
+	/**
+     * Completes frame rendering and presents to display.
+     * Submits command buffers and handles swapchain presentation.
+     */
 	void endFrame();
+	
+	/**
+     * Releases all Vulkan resources.
+     * Called during shutdown to prevent resource leaks.
+     */
 	void cleanup();
 
+    /**
+     * Sets up shadow rendering for the Niagara engine.
+     * Configures shadow mapping resources and parameters.
+     */
 	void niagaraShadows();
+	
+	/**
+     * Loads a 3D scene from a GLTF file.
+     * @param filename Path to the GLTF file
+     * @return True if loading was successful, false otherwise
+     */
 	bool loadGLTFScene(std::string filename);
 };
