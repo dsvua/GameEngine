@@ -75,4 +75,4 @@ GfxDevice initDevice();
  * Checks if application should quit by polling SDL events.
  * @return True if quit event received, false otherwise
  */
-bool shouldQuit();
+bool shouldQuit(GfxDevice gfxDevice);

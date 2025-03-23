@@ -34,7 +34,7 @@ int main(int __argc, const char** __argv)
 
     Renderer renderer;
 
-    while (!shouldQuit())
+    while (!shouldQuit(renderer.m_gfxDevice))
     {
         printf("Calling renderer.draw() \n");
         renderer.draw();

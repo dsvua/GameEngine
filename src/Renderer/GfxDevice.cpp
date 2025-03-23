@@ -149,7 +149,7 @@ GfxDevice initDevice()
     return result;
 }
 
-bool shouldQuit()
+bool shouldQuit(GfxDevice gfxDevice)
 {
 	SDL_Event e;
 	while (SDL_PollEvent(&e) != 0)
