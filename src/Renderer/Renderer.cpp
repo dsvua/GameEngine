@@ -105,7 +105,7 @@ Renderer::Renderer()
 
     m_gfxDevice.m_gbufferInfo.colorAttachmentCount = gbufferCount;
 	m_gfxDevice.m_gbufferInfo.pColorAttachmentFormats = m_gbufferFormats;
-	m_gfxDevice.m_gbufferInfo.depthAttachmentFormat = m_gfxDevice.depthFormat;
+	m_gfxDevice.m_gbufferInfo.depthAttachmentFormat = m_gfxDevice.m_depthFormat;
 
     createBuffer(m_buffers.scratch, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, 128 * 1024 * 1024, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
@@ -165,7 +165,7 @@ void Renderer::createFramesData()
 	m_queryPoolPipeline = createQueryPool(m_gfxDevice.m_device, 4, VK_QUERY_TYPE_PIPELINE_STATISTICS);
 	assert(m_queryPoolPipeline);
 
-    m_gfxDevice.swapchainImageViews.resize(m_gfxDevice.swapchain.imageCount);
+    m_gfxDevice.m_swapchainImageViews.resize(m_gfxDevice.m_swapchain.imageCount);
 
     for (int i = 0; i < FRAMES_COUNT; i++)
     {
@@ -224,14 +224,14 @@ bool Renderer::beginFrame()
     
     m_frames[m_currentFrameIndex].deltaTime = (std::chrono::duration_cast<std::chrono::milliseconds>(m_frames[m_lastFrameIndex].frameTimeStamp - m_frames[m_currentFrameIndex].frameTimeStamp)).count();
 
-    SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.swapchain, m_gfxDevice.m_physicalDevice, m_gfxDevice.m_device, m_gfxDevice.surface, m_gfxDevice.m_familyIndex, m_gfxDevice.m_window, m_gfxDevice.swapchainFormat);
+    SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.m_swapchain, m_gfxDevice.m_physicalDevice, m_gfxDevice.m_device, m_gfxDevice.m_surface, m_gfxDevice.m_familyIndex, m_gfxDevice.m_window, m_gfxDevice.m_swapchainFormat);
 
     if (swapchainStatus == Swapchain_NotReady)
         return false;
 
     if (swapchainStatus == Swapchain_Resized || !m_depthTarget.image)
     {
-        printf("Swapchain: %dx%d\n", m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height);
+        printf("Swapchain: %dx%d\n", m_gfxDevice.m_swapchain.width, m_gfxDevice.m_swapchain.height);
 
         for (Image& image : m_gbufferTargets)
             if (image.image)
@@ -252,15 +252,15 @@ bool Renderer::beginFrame()
             destroyImage(m_shadowblurTarget, m_gfxDevice.m_device);
 
         for (uint32_t i = 0; i < gbufferCount; ++i)
-            createImage(m_gbufferTargets[i], m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gbufferFormats[i], VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-        createImage(m_depthTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, m_gfxDevice.depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+            createImage(m_gbufferTargets[i], m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.m_swapchain.width, m_gfxDevice.m_swapchain.height, 1, m_gbufferFormats[i], VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_depthTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.m_swapchain.width, m_gfxDevice.m_swapchain.height, 1, m_gfxDevice.m_depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-        createImage(m_shadowTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-        createImage(m_shadowblurTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_shadowTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.m_swapchain.width, m_gfxDevice.m_swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+        createImage(m_shadowblurTarget, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_gfxDevice.m_swapchain.width, m_gfxDevice.m_swapchain.height, 1, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
         // Note: previousPow2 makes sure all reductions are at most by 2x2 which makes sure they are conservative
-        m_depthPyramidWidth = previousPow2(m_gfxDevice.swapchain.width);
-        m_depthPyramidHeight = previousPow2(m_gfxDevice.swapchain.height);
+        m_depthPyramidWidth = previousPow2(m_gfxDevice.m_swapchain.width);
+        m_depthPyramidHeight = previousPow2(m_gfxDevice.m_swapchain.height);
         m_depthPyramidLevels = getImageMipLevels(m_depthPyramidWidth, m_depthPyramidHeight);
 
         createImage(m_depthPyramid, m_gfxDevice.m_device, m_gfxDevice.m_memoryProperties, m_depthPyramidWidth, m_depthPyramidHeight, m_depthPyramidLevels, VK_FORMAT_R32_SFLOAT, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
@@ -271,16 +271,16 @@ bool Renderer::beginFrame()
             assert(m_depthPyramidMips[i]);
         }
 
-        for (uint32_t i = 0; i < m_gfxDevice.swapchain.imageCount; ++i)
+        for (uint32_t i = 0; i < m_gfxDevice.m_swapchain.imageCount; ++i)
         {
-            if (m_gfxDevice.swapchainImageViews[i])
-                vkDestroyImageView(m_gfxDevice.m_device, m_gfxDevice.swapchainImageViews[i], 0);
+            if (m_gfxDevice.m_swapchainImageViews[i])
+                vkDestroyImageView(m_gfxDevice.m_device, m_gfxDevice.m_swapchainImageViews[i], 0);
 
-                m_gfxDevice.swapchainImageViews[i] = createImageView(m_gfxDevice.m_device, m_gfxDevice.swapchain.images[i], m_gfxDevice.swapchainFormat, 0, 1);
+                m_gfxDevice.m_swapchainImageViews[i] = createImageView(m_gfxDevice.m_device, m_gfxDevice.m_swapchain.images[i], m_gfxDevice.m_swapchainFormat, 0, 1);
         }
     }
 
-    VkResult acquireResult = vkAcquireNextImageKHR(m_gfxDevice.m_device, m_gfxDevice.swapchain.swapchain, ~0ull, m_frames[m_currentFrameIndex].waitSemaphore, VK_NULL_HANDLE, &m_imageIndex);
+    VkResult acquireResult = vkAcquireNextImageKHR(m_gfxDevice.m_device, m_gfxDevice.m_swapchain.swapchain, ~0ull, m_frames[m_currentFrameIndex].waitSemaphore, VK_NULL_HANDLE, &m_imageIndex);
     if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR)
         return false; // attempting to render to an out-of-date swapchain would break semaphore synchronization
     VK_CHECK_SWAPCHAIN(acquireResult);
@@ -340,7 +340,7 @@ bool Renderer::beginFrame()
     m_view = inverse(m_view);
     m_view = glm::scale(glm::identity<glm::mat4>(), vec3(1, 1, -1)) * m_view;
 
-    m_projection = perspectiveProjection(m_camera.fovY, float(m_gfxDevice.swapchain.width) / float(m_gfxDevice.swapchain.height), m_camera.znear);
+    m_projection = perspectiveProjection(m_camera.fovY, float(m_gfxDevice.m_swapchain.width) / float(m_gfxDevice.m_swapchain.height), m_camera.znear);
 
     m_projectionT = transpose(m_projection);
 
@@ -361,7 +361,7 @@ bool Renderer::beginFrame()
     m_cullData.cullingEnabled = true;
     m_cullData.lodEnabled = true;
     m_cullData.occlusionEnabled = true;
-    m_cullData.lodTarget = (2 / m_cullData.P11) * (1.f / float(m_gfxDevice.swapchain.height)) * (1 << 0); // 1px
+    m_cullData.lodTarget = (2 / m_cullData.P11) * (1.f / float(m_gfxDevice.m_swapchain.height)) * (1 << 0); // 1px
     m_cullData.pyramidWidth = float(m_depthPyramidWidth);
     m_cullData.pyramidHeight = float(m_depthPyramidHeight);
     m_cullData.clusterOcclusionEnabled = true;
@@ -369,8 +369,8 @@ bool Renderer::beginFrame()
     Globals m_globals = {};
     m_globals.projection = m_projection;
     m_globals.cullData = m_cullData;
-    m_globals.screenWidth = float(m_gfxDevice.swapchain.width);
-    m_globals.screenHeight = float(m_gfxDevice.swapchain.height);
+    m_globals.screenWidth = float(m_gfxDevice.m_swapchain.width);
+    m_globals.screenHeight = float(m_gfxDevice.m_swapchain.height);
 
     VkImageMemoryBarrier2 renderBeginBarriers[gbufferCount + 1] = {
         imageBarrier(m_depthTarget.image,
@@ -519,8 +519,8 @@ void Renderer::drawRender(bool late, const VkClearColorValue &colorClear, const 
     depthAttachment.clearValue.depthStencil = depthClear;
 
     VkRenderingInfo passInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
-    passInfo.renderArea.extent.width = m_gfxDevice.swapchain.width;
-    passInfo.renderArea.extent.height = m_gfxDevice.swapchain.height;
+    passInfo.renderArea.extent.width = m_gfxDevice.m_swapchain.width;
+    passInfo.renderArea.extent.height = m_gfxDevice.m_swapchain.height;
     passInfo.layerCount = 1;
     passInfo.colorAttachmentCount = gbufferCount;
     passInfo.pColorAttachments = gbufferAttachments;
@@ -528,8 +528,8 @@ void Renderer::drawRender(bool late, const VkClearColorValue &colorClear, const 
 
     vkCmdBeginRendering(commandBuffer, &passInfo);
 
-    VkViewport viewport = { 0, float(m_gfxDevice.swapchain.height), float(m_gfxDevice.swapchain.width), -float(m_gfxDevice.swapchain.height), 0, 1 };
-    VkRect2D scissor = { { 0, 0 }, { uint32_t(m_gfxDevice.swapchain.width), uint32_t(m_gfxDevice.swapchain.height) } };
+    VkViewport viewport = { 0, float(m_gfxDevice.m_swapchain.height), float(m_gfxDevice.m_swapchain.width), -float(m_gfxDevice.m_swapchain.height), 0, 1 };
+    VkRect2D scissor = { { 0, 0 }, { uint32_t(m_gfxDevice.m_swapchain.width), uint32_t(m_gfxDevice.m_swapchain.height) } };
 
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
@@ -638,7 +638,7 @@ void Renderer::drawDebug()
     // };
 
     // VkImageMemoryBarrier2 textBarrier =
-    //     imageBarrier(m_gfxDevice.swapchain.images[m_imageIndex],
+    //     imageBarrier(m_gfxDevice.m_swapchain.images[m_imageIndex],
     //         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
     //         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL);
 
@@ -646,26 +646,26 @@ void Renderer::drawDebug()
 
     // vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipelines.debugtextPipeline);
 
-    // DescriptorInfo descriptors[] = { { m_gfxDevice.swapchainImageViews[m_imageIndex], VK_IMAGE_LAYOUT_GENERAL } };
+    // DescriptorInfo descriptors[] = { { m_gfxDevice.m_swapchainImageViews[m_imageIndex], VK_IMAGE_LAYOUT_GENERAL } };
     // vkCmdPushDescriptorSetWithTemplate(commandBuffer, m_programs.debugtextProgram.updateTemplate, m_programs.debugtextProgram.layout, 0, descriptors);
 
     // // debug text goes here!
     // uint64_t triangleCount = m_pipelineResults[0] + m_pipelineResults[1] + m_pipelineResults[2];
 
-    // double frameGpuBegin = double(m_timestampResults[0]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double frameGpuEnd = double(m_timestampResults[1]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
+    // double frameGpuBegin = double(m_timestampResults[0]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double frameGpuEnd = double(m_timestampResults[1]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
 
-    // double cullGpuTime = double(m_timestampResults[3] - m_timestampResults[2]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double renderGpuTime = double(m_timestampResults[5] - m_timestampResults[4]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double pyramidGpuTime = double(m_timestampResults[7] - m_timestampResults[6]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double culllateGpuTime = double(m_timestampResults[9] - m_timestampResults[8]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double renderlateGpuTime = double(m_timestampResults[11] - m_timestampResults[10]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double cullpostGpuTime = double(m_timestampResults[13] - m_timestampResults[12]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double renderpostGpuTime = double(m_timestampResults[15] - m_timestampResults[14]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double shadowsGpuTime = double(m_timestampResults[17] - m_timestampResults[16]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double shadowblurGpuTime = double(m_timestampResults[18] - m_timestampResults[17]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double shadeGpuTime = double(m_timestampResults[20] - m_timestampResults[19]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double tlasGpuTime = double(m_timestampResults[22] - m_timestampResults[21]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
+    // double cullGpuTime = double(m_timestampResults[3] - m_timestampResults[2]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double renderGpuTime = double(m_timestampResults[5] - m_timestampResults[4]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double pyramidGpuTime = double(m_timestampResults[7] - m_timestampResults[6]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double culllateGpuTime = double(m_timestampResults[9] - m_timestampResults[8]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double renderlateGpuTime = double(m_timestampResults[11] - m_timestampResults[10]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double cullpostGpuTime = double(m_timestampResults[13] - m_timestampResults[12]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double renderpostGpuTime = double(m_timestampResults[15] - m_timestampResults[14]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double shadowsGpuTime = double(m_timestampResults[17] - m_timestampResults[16]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double shadowblurGpuTime = double(m_timestampResults[18] - m_timestampResults[17]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double shadeGpuTime = double(m_timestampResults[20] - m_timestampResults[19]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
+    // double tlasGpuTime = double(m_timestampResults[22] - m_timestampResults[21]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
 
     // double trianglesPerSec = double(triangleCount) / double(m_frameGpuAvg * 1e-3);
     // double drawsPerSec = double(m_draws.size()) / double(m_frameGpuAvg * 1e-3);
@@ -748,7 +748,7 @@ void Renderer::niagaraShadows()
 
     VkImageMemoryBarrier2 blitBarriers[2 + gbufferCount] = {
         // note: even though the source image has previous state as undef, we need to specify COMPUTE_SHADER to synchronize with submitStageMask below
-        imageBarrier(m_gfxDevice.swapchain.images[m_imageIndex],
+        imageBarrier(m_gfxDevice.m_swapchain.images[m_imageIndex],
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, VK_IMAGE_LAYOUT_UNDEFINED,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL),
         imageBarrier(m_depthTarget.image,
@@ -772,7 +772,7 @@ void Renderer::niagaraShadows()
     int shadowQuality = 1;
     bool shadowsEnabled = true;
     bool shadowblurEnabled = true;
-    int shadowWidthCB = shadowCheckerboard ? (m_gfxDevice.swapchain.width + 1) / 2 : m_gfxDevice.swapchain.width;
+    int shadowWidthCB = shadowCheckerboard ? (m_gfxDevice.m_swapchain.width + 1) / 2 : m_gfxDevice.m_swapchain.width;
     int shadowCheckerboardF = shadowCheckerboard ? 1 : 0;
 
     vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 0);
@@ -795,10 +795,10 @@ void Renderer::niagaraShadows()
         shadowData.sunDirection = m_sunDirection;
         shadowData.sunJitter = shadowblurEnabled ? 1e-2f : 0;
         shadowData.inverseViewProjection = inverse(m_projection * m_view);
-        shadowData.imageSize = vec2(float(m_gfxDevice.swapchain.width), float(m_gfxDevice.swapchain.height));
+        shadowData.imageSize = vec2(float(m_gfxDevice.m_swapchain.width), float(m_gfxDevice.m_swapchain.height));
         shadowData.checkerboard = shadowCheckerboardF;
 
-        dispatch(commandBuffer, m_programs.shadowProgram, shadowWidthCB, m_gfxDevice.swapchain.height, shadowData, descriptors);
+        dispatch(commandBuffer, m_programs.shadowProgram, shadowWidthCB, m_gfxDevice.m_swapchain.height, shadowData, descriptors);
     }
 
     vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
@@ -823,9 +823,9 @@ void Renderer::niagaraShadows()
 
         DescriptorInfo descriptors[] = { { blurTo.imageView, VK_IMAGE_LAYOUT_GENERAL }, { m_samplers.readSampler, blurFrom.imageView, VK_IMAGE_LAYOUT_GENERAL }, { m_samplers.readSampler, m_depthTarget.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL } };
 
-        vec4 blurData = vec4(float(m_gfxDevice.swapchain.width), float(m_gfxDevice.swapchain.height), pass == 0 ? 1 : 0, m_camera.znear);
+        vec4 blurData = vec4(float(m_gfxDevice.m_swapchain.width), float(m_gfxDevice.m_swapchain.height), pass == 0 ? 1 : 0, m_camera.znear);
 
-        dispatch(commandBuffer, m_programs.shadowblurProgram, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, blurData, descriptors);
+        dispatch(commandBuffer, m_programs.shadowblurProgram, m_gfxDevice.m_swapchain.width, m_gfxDevice.m_swapchain.height, blurData, descriptors);
     }
 
     VkImageMemoryBarrier2 postblurBarrier =
@@ -845,16 +845,16 @@ void Renderer::niagaraShadows()
         {
             vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipelines.finalPipeline);
 
-            DescriptorInfo descriptors[] = { { m_gfxDevice.swapchainImageViews[m_imageIndex], VK_IMAGE_LAYOUT_GENERAL }, { m_samplers.readSampler, m_gbufferTargets[0].imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.readSampler, m_gbufferTargets[1].imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.readSampler, m_depthTarget.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.readSampler, m_shadowTarget.imageView, VK_IMAGE_LAYOUT_GENERAL } };
+            DescriptorInfo descriptors[] = { { m_gfxDevice.m_swapchainImageViews[m_imageIndex], VK_IMAGE_LAYOUT_GENERAL }, { m_samplers.readSampler, m_gbufferTargets[0].imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.readSampler, m_gbufferTargets[1].imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.readSampler, m_depthTarget.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL }, { m_samplers.readSampler, m_shadowTarget.imageView, VK_IMAGE_LAYOUT_GENERAL } };
 
             ShadeData shadeData = {};
             shadeData.cameraPosition = m_camera.position;
             shadeData.sunDirection = m_sunDirection;
             shadeData.shadowsEnabled = shadowsEnabled;
             shadeData.inverseViewProjection = inverse(m_projection * m_view);
-            shadeData.imageSize = vec2(float(m_gfxDevice.swapchain.width), float(m_gfxDevice.swapchain.height));
+            shadeData.imageSize = vec2(float(m_gfxDevice.m_swapchain.width), float(m_gfxDevice.m_swapchain.height));
 
-            dispatch(commandBuffer, m_programs.finalProgram, m_gfxDevice.swapchain.width, m_gfxDevice.swapchain.height, shadeData, descriptors);
+            dispatch(commandBuffer, m_programs.finalProgram, m_gfxDevice.m_swapchain.width, m_gfxDevice.m_swapchain.height, shadeData, descriptors);
         }
 
         vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
@@ -998,7 +998,7 @@ void Renderer::endFrame()
 {
     auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].commandBuffer;
 
-    VkImageMemoryBarrier2 presentBarrier = imageBarrier(m_gfxDevice.swapchain.images[m_imageIndex],
+    VkImageMemoryBarrier2 presentBarrier = imageBarrier(m_gfxDevice.m_swapchain.images[m_imageIndex],
         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
         0, 0, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
@@ -1025,7 +1025,7 @@ void Renderer::endFrame()
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = &m_frames[m_currentFrameIndex].signalSemaphore;
     presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = &m_gfxDevice.swapchain.swapchain;
+    presentInfo.pSwapchains = &m_gfxDevice.m_swapchain.swapchain;
     presentInfo.pImageIndices = &m_imageIndex;
 
     VK_CHECK_SWAPCHAIN(vkQueuePresentKHR(m_queue, &presentInfo));
@@ -1059,9 +1059,9 @@ void Renderer::cleanup()
 	if (m_shadowblurTarget.image)
 		destroyImage(m_shadowblurTarget, m_gfxDevice.m_device);
 
-	for (uint32_t i = 0; i < m_gfxDevice.swapchain.imageCount; ++i)
-		if (m_gfxDevice.swapchainImageViews[i])
-			vkDestroyImageView(m_gfxDevice.m_device, m_gfxDevice.swapchainImageViews[i], 0);
+	for (uint32_t i = 0; i < m_gfxDevice.m_swapchain.imageCount; ++i)
+		if (m_gfxDevice.m_swapchainImageViews[i])
+			vkDestroyImageView(m_gfxDevice.m_device, m_gfxDevice.m_swapchainImageViews[i], 0);
 
 	destroyBuffer(m_buffers.meshesh, m_gfxDevice.m_device);
 	destroyBuffer(m_buffers.materials, m_gfxDevice.m_device);
@@ -1092,7 +1092,7 @@ void Renderer::cleanup()
 	vkDestroyQueryPool(m_gfxDevice.m_device, m_queryPoolTimestamp, 0);
 	vkDestroyQueryPool(m_gfxDevice.m_device, m_queryPoolPipeline, 0);
 
-	destroySwapchain(m_gfxDevice.m_device, m_gfxDevice.swapchain);
+	destroySwapchain(m_gfxDevice.m_device, m_gfxDevice.m_swapchain);
 
 	for (VkPipeline pipeline : m_pipelines.pipelines)
 		vkDestroyPipeline(m_gfxDevice.m_device, pipeline, 0);
@@ -1127,7 +1127,7 @@ void Renderer::cleanup()
         vkDestroySemaphore(m_gfxDevice.m_device, m_frames[i].waitSemaphore, 0);
     }
 
-	vkDestroySurfaceKHR(m_gfxDevice.m_instance, m_gfxDevice.surface, 0);
+	vkDestroySurfaceKHR(m_gfxDevice.m_instance, m_gfxDevice.m_surface, 0);
 
 
 	vkDestroyDevice(m_gfxDevice.m_device, 0);

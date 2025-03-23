@@ -10,13 +10,13 @@
 - [x] Rename `memoryProperties` to `m_memoryProperties`
 - [x] Rename `familyIndex` to `m_familyIndex`
 - [x] Rename `device` to `m_device`
-- [ ] Rename `surface` to `m_surface`
-- [ ] Rename `swapchain` to `m_swapchain`
-- [ ] Rename `swapchainFormat` to `m_swapchainFormat`
-- [ ] Rename `depthFormat` to `m_depthFormat`
-- [ ] Rename `props` to `m_props`
-- [ ] Rename `debugCallback` to `m_debugCallback`
-- [ ] Rename `swapchainImageViews` to `m_swapchainImageViews`
+- [x] Rename `surface` to `m_surface`
+- [x] Rename `swapchain` to `m_swapchain`
+- [x] Rename `swapchainFormat` to `m_swapchainFormat`
+- [x] Rename `depthFormat` to `m_depthFormat`
+- [x] Rename `props` to `m_props`
+- [x] Rename `debugCallback` to `m_debugCallback`
+- [x] Rename `swapchainImageViews` to `m_swapchainImageViews`
 
 ### Renderer.h - FrameData Struct
 - [ ] Rename `waitSemaphore` to `m_waitSemaphore`

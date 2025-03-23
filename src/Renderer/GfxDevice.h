@@ -16,14 +16,14 @@ struct GfxDevice {
     VkPhysicalDeviceMemoryProperties m_memoryProperties;
     uint32_t m_familyIndex;
     VkDevice m_device;
-    VkSurfaceKHR surface;
-    Swapchain swapchain;
-	VkFormat swapchainFormat;
-	VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
-	VkPhysicalDeviceProperties props = {};
-	VkDebugReportCallbackEXT debugCallback;
+    VkSurfaceKHR m_surface;
+    Swapchain m_swapchain;
+	VkFormat m_swapchainFormat;
+	VkFormat m_depthFormat = VK_FORMAT_D32_SFLOAT;
+	VkPhysicalDeviceProperties m_props = {};
+	VkDebugReportCallbackEXT m_debugCallback;
 
-	std::vector<VkImageView> swapchainImageViews;
+	std::vector<VkImageView> m_swapchainImageViews;
 
 };
 

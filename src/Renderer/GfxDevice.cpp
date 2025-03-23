@@ -107,7 +107,7 @@ GfxDevice initDevice()
 	volkLoadInstanceOnly(result.m_instance);
 
 	printf("Registering debug callback\n");
-	result.debugCallback = registerDebugCallback(result.m_instance);
+	result.m_debugCallback = registerDebugCallback(result.m_instance);
 	registerDebugCallback(result.m_instance);
 	VkPhysicalDevice physicalDevices[16];
 	uint32_t physicalDeviceCount = sizeof(physicalDevices) / sizeof(physicalDevices[0]);
@@ -135,8 +135,8 @@ GfxDevice initDevice()
     assert(meshShadingSupported);
     assert(raytracingSupported);
 
-	vkGetPhysicalDeviceProperties(result.m_physicalDevice, &result.props);
-	assert(result.props.limits.timestampComputeAndGraphics);
+	vkGetPhysicalDeviceProperties(result.m_physicalDevice, &result.m_props);
+	assert(result.m_props.limits.timestampComputeAndGraphics);
 
 	result.m_familyIndex = getGraphicsFamilyIndex(result.m_physicalDevice);
 	assert(result.m_familyIndex != VK_QUEUE_FAMILY_IGNORED);
@@ -146,19 +146,19 @@ GfxDevice initDevice()
 
 	volkLoadDevice(result.m_device);
 
-	result.surface = createSurface(result.m_instance, result.m_window);
-	assert(result.surface);
+	result.m_surface = createSurface(result.m_instance, result.m_window);
+	assert(result.m_surface);
 
 	VkBool32 presentSupported = 0;
-	VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(result.m_physicalDevice, result.m_familyIndex, result.surface, &presentSupported));
+	VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(result.m_physicalDevice, result.m_familyIndex, result.m_surface, &presentSupported));
 	assert(presentSupported);
 
-	result.swapchainFormat = getSwapchainFormat(result.m_physicalDevice, result.surface);
-	result.depthFormat = VK_FORMAT_D32_SFLOAT;
+	result.m_swapchainFormat = getSwapchainFormat(result.m_physicalDevice, result.m_surface);
+	result.m_depthFormat = VK_FORMAT_D32_SFLOAT;
 
 	vkGetPhysicalDeviceMemoryProperties(result.m_physicalDevice, &result.m_memoryProperties);
 
-	createSwapchain(result.swapchain, result.m_physicalDevice, result.m_device, result.surface, result.m_familyIndex, result.m_window, result.swapchainFormat);
+	createSwapchain(result.m_swapchain, result.m_physicalDevice, result.m_device, result.m_surface, result.m_familyIndex, result.m_window, result.m_swapchainFormat);
 
     return result;
 }
