@@ -1,10 +1,9 @@
 # GameEngine Development Guidelines
 
 ## Build Commands
-- Build project: `cmake -B build && cmake --build build`
-- Run application: `./bin/GameEngine`
 - Build project: `./build.sh`
 - Run AIGameEngine: `./run.sh`
+- Always change directory into `./bin` if you want to run `./GameEngine` directly
 - Compile shaders only: `cmake --build build --target compile_shaders`
 
 ## Code Style
