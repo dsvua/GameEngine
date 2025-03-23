@@ -3,6 +3,8 @@
 #include "niagara/math.h"
 #include "niagara/common.h"
 #include "niagara/shaders.h"
+#include "niagara/resources.h"
+#include "GfxTypes.h"
 #include <stdint.h>
 
 /**
@@ -76,6 +78,122 @@ double rand01();
  * @return Random 32-bit unsigned integer
  */
 uint32_t rand32();
+
+/**
+ * Creates a VkRenderingAttachmentInfo structure for color attachments.
+ * 
+ * @param imageView The image view to attach
+ * @param imageLayout The layout of the image
+ * @param loadOp The load operation to perform
+ * @param clearValue The clear value to use
+ * @return Initialized VkRenderingAttachmentInfo structure
+ */
+VkRenderingAttachmentInfo createColorAttachmentInfo(VkImageView imageView, VkImageLayout imageLayout, VkAttachmentLoadOp loadOp, const VkClearColorValue& clearValue);
+
+/**
+ * Creates a VkRenderingAttachmentInfo structure for depth attachments.
+ * 
+ * @param imageView The image view to attach
+ * @param imageLayout The layout of the image
+ * @param loadOp The load operation to perform
+ * @param clearValue The clear value to use
+ * @return Initialized VkRenderingAttachmentInfo structure
+ */
+VkRenderingAttachmentInfo createDepthAttachmentInfo(VkImageView imageView, VkImageLayout imageLayout, VkAttachmentLoadOp loadOp, const VkClearDepthStencilValue& clearValue);
+
+/**
+ * Creates a VkViewport structure.
+ * 
+ * @param width Viewport width
+ * @param height Viewport height
+ * @return Initialized VkViewport structure
+ */
+VkViewport createViewport(float width, float height);
+
+/**
+ * Creates a VkRect2D structure for scissor test.
+ * 
+ * @param width Scissor width
+ * @param height Scissor height
+ * @return Initialized VkRect2D structure
+ */
+VkRect2D createScissorRect(uint32_t width, uint32_t height);
+
+/**
+ * Creates image barriers for transitioning render targets from undefined to attachment optimal.
+ * 
+ * @param depthImage The depth image to transition
+ * @param colorImages Array of color images to transition
+ * @param colorCount Number of color images
+ * @param barriers Output array to store the barriers (should be large enough for colorCount + 1)
+ */
+void createRenderTargetBarriers(VkImage depthImage, const VkImage* colorImages, uint32_t colorCount, VkImageMemoryBarrier2* barriers);
+
+/**
+ * Calculates the view matrix from camera position and orientation.
+ * 
+ * @param camera The camera with position and orientation
+ * @return The view matrix for rendering
+ */
+mat4 calculateViewMatrix(const Camera& camera);
+
+/**
+ * Sets up culling data for the renderer based on camera and view parameters.
+ * 
+ * @param view The view matrix
+ * @param projection The projection matrix 
+ * @param camera The camera data
+ * @param drawDistance Maximum render distance
+ * @param drawCount Number of objects to potentially render
+ * @param depthPyramidWidth Width of the depth pyramid texture
+ * @param depthPyramidHeight Height of the depth pyramid texture 
+ * @param screenHeight Screen height for LOD calculations
+ * @return Initialized CullData structure
+ */
+CullData setupCullingData(
+    const mat4& view, 
+    const mat4& projection,
+    const Camera& camera,
+    float drawDistance,
+    uint32_t drawCount,
+    float depthPyramidWidth,
+    float depthPyramidHeight,
+    float screenHeight);
+
+/**
+ * Clears a buffer using a command buffer and sets up necessary pipeline barriers.
+ * 
+ * @param commandBuffer The command buffer to record commands to
+ * @param buffer The buffer to clear
+ * @param size Size of the data to clear (in bytes)
+ * @param srcStageMask Source pipeline stage mask for the barrier
+ * @param dstStageMask Destination pipeline stage mask for the barrier
+ * @param dstAccessMask Destination access mask for the barrier
+ */
+void clearBuffer(
+    VkCommandBuffer commandBuffer, 
+    VkBuffer buffer, 
+    VkDeviceSize size, 
+    VkPipelineStageFlags2 srcStageMask,
+    VkPipelineStageFlags2 dstStageMask,
+    VkAccessFlags2 dstAccessMask);
+
+/**
+ * Creates a VkRenderingInfo structure for dynamic rendering.
+ * 
+ * @param width Width of the render area
+ * @param height Height of the render area
+ * @param colorAttachments Array of color attachments
+ * @param colorAttachmentCount Number of color attachments
+ * @param depthAttachment Depth attachment
+ * @return Initialized VkRenderingInfo structure
+ */
+VkRenderingInfo createRenderingInfo(
+    uint32_t width,
+    uint32_t height,
+    const VkRenderingAttachmentInfo* colorAttachments,
+    uint32_t colorAttachmentCount,
+    const VkRenderingAttachmentInfo* depthAttachment);
 
 /**
  * Dispatches a compute shader with push constants and descriptors.
