@@ -120,7 +120,6 @@ void Renderer::createPrograms()
     m_textureSetLayout = createDescriptorArrayLayout(m_gfxDevice.device);
     m_pipelines.pipelineCache = 0;
 
-    // m_programs.debugtextProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["debugtext.comp"] }, sizeof(TextData));
     m_programs.drawcullProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["drawcull.comp"] }, sizeof(CullData));
     m_programs.tasksubmitProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["tasksubmit.comp"] }, 0);
     m_programs.clustersubmitProgram = createProgram(m_gfxDevice.device, VK_PIPELINE_BIND_POINT_COMPUTE, { &m_shaders["clustersubmit.comp"] }, 0);
@@ -143,8 +142,6 @@ void Renderer::createPipelines()
 
     m_pipelines.pipelines.clear();
 
-    // replace(m_pipelines.debugtextPipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.debugtextProgram));
-
     replace(m_pipelines.taskcullPipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.drawcullProgram, { /* LATE= */ false, /* TASK= */ true }));
     replace(m_pipelines.taskculllatePipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.drawcullProgram, { /* LATE= */ true, /* TASK= */ true }));
 
@@ -157,11 +154,6 @@ void Renderer::createPipelines()
     replace(m_pipelines.meshtaskpostPipeline, createGraphicsPipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_gfxDevice.gbufferInfo, m_programs.meshtaskProgram, { /* LATE= */ true, /* TASK= */ true, /* POST= */ 1 }));
 
     replace(m_pipelines.finalPipeline, createComputePipeline(m_gfxDevice.device, m_pipelines.pipelineCache, m_programs.finalProgram));
-
-    // replace(shadowlqPipeline, createComputePipeline(device, pipelineCache, shadowProgram, { /* QUALITY= */ 0 }));
-    // replace(shadowhqPipeline, createComputePipeline(device, pipelineCache, shadowProgram, { /* QUALITY= */ 1 }));
-    // replace(shadowfillPipeline, createComputePipeline(device, pipelineCache, shadowfillProgram));
-    // replace(shadowblurPipeline, createComputePipeline(device, pipelineCache, shadowblurProgram));
 
 }
 
@@ -231,28 +223,6 @@ bool Renderer::beginFrame()
     m_frames[m_currentFrameIndex].frameTimeStamp = std::chrono::system_clock::now();
     
     m_frames[m_currentFrameIndex].deltaTime = (std::chrono::duration_cast<std::chrono::milliseconds>(m_frames[m_lastFrameIndex].frameTimeStamp - m_frames[m_currentFrameIndex].frameTimeStamp)).count();
-
-    // glfwPollEvents();
-
-    // if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
-    // {
-    //     double xpos, ypos;
-    //     glfwGetCursorPos(window, &xpos, &ypos);
-
-    //     bool cameraBoost = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
-    //     vec2 cameraMotion = vec2(glfwGetKey(window, GLFW_KEY_W), glfwGetKey(window, GLFW_KEY_D)) - vec2(glfwGetKey(window, GLFW_KEY_S), glfwGetKey(window, GLFW_KEY_A));
-    //     vec2 cameraRotation = vec2(xpos, ypos);
-
-    //     float cameraMotionSpeed = cameraBoost ? 10.f : 3.0f;
-    //     float cameraRotationSpeed = glm::radians(10.f);
-
-    //     camera.position += float(cameraMotion.y * frameDelta * cameraMotionSpeed) * (camera.orientation * vec3(1, 0, 0));
-    //     camera.position += float(cameraMotion.x * frameDelta * cameraMotionSpeed) * (camera.orientation * vec3(0, 0, -1));
-    //     camera.orientation = glm::rotate(glm::quat(0, 0, 0, 1), float(-cameraRotation.x * frameDelta * cameraRotationSpeed), vec3(0, 1, 0)) * camera.orientation;
-    //     camera.orientation = glm::rotate(glm::quat(0, 0, 0, 1), float(-cameraRotation.y * frameDelta * cameraRotationSpeed), camera.orientation * vec3(1, 0, 0)) * camera.orientation;
-
-    //     glfwSetCursorPos(window, 0, 0);
-    // }
 
     SwapchainStatus swapchainStatus = updateSwapchain(m_gfxDevice.swapchain, m_gfxDevice.physicalDevice, m_gfxDevice.device, m_gfxDevice.surface, m_gfxDevice.familyIndex, m_gfxDevice.window, m_gfxDevice.swapchainFormat);
 
@@ -1060,25 +1030,6 @@ void Renderer::endFrame()
 
     VK_CHECK_SWAPCHAIN(vkQueuePresentKHR(m_queue, &presentInfo));
 
-    // VK_CHECK(vkWaitForFences(m_gfxDevice.device, 1, &frameFence, VK_TRUE, ~0ull));
-    // VK_CHECK(vkResetFences(m_gfxDevice.device, 1, &frameFence));
-
-    // VK_CHECK_QUERY(vkGetQueryPoolResults(m_gfxDevice.device, m_queryPoolTimestamp, 0, COUNTOF(m_timestampResults), sizeof(m_timestampResults), m_timestampResults, sizeof(m_timestampResults[0]), VK_QUERY_RESULT_64_BIT));
-    // VK_CHECK_QUERY(vkGetQueryPoolResults(m_gfxDevice.device, m_queryPoolPipeline, 0, COUNTOF(m_pipelineResults), sizeof(m_pipelineResults), m_pipelineResults, sizeof(m_pipelineResults[0]), VK_QUERY_RESULT_64_BIT));
-
-    // double frameGpuBegin = double(m_timestampResults[0]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-    // double frameGpuEnd = double(m_timestampResults[1]) * m_gfxDevice.props.limits.timestampPeriod * 1e-6;
-
-    // m_frameGpuAvg = m_frameGpuAvg * 0.95 + (frameGpuEnd - frameGpuBegin) * 0.05;
-
-//     if (debugSleep)
-//     {
-// #ifdef _WIN32
-//         Sleep(20);
-// #else
-//         usleep(20 * 1000);
-// #endif
-//     }
     m_frameIndex++;
 }
 
@@ -1180,9 +1131,6 @@ void Renderer::cleanup()
 
 
 	vkDestroyDevice(m_gfxDevice.device, 0);
-
-	// if (debugCallback)
-	// 	vkDestroyDebugReportCallbackEXT(m_gfxDevice.instance, debugCallback, 0);
 
 	vkDestroyInstance(m_gfxDevice.instance, 0);
 
