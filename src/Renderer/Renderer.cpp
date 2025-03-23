@@ -10,6 +10,211 @@
 #include <string.h>
 // #include "volk.h"
 
+/**
+ * Creates a VkRenderingAttachmentInfo structure for color attachments.
+ * 
+ * @param imageView The image view to attach
+ * @param imageLayout The layout of the image
+ * @param loadOp The load operation to perform
+ * @param clearValue The clear value to use
+ * @return Initialized VkRenderingAttachmentInfo structure
+ */
+VkRenderingAttachmentInfo createColorAttachmentInfo(VkImageView imageView, VkImageLayout imageLayout, VkAttachmentLoadOp loadOp, const VkClearColorValue& clearValue)
+{
+    VkRenderingAttachmentInfo attachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
+    attachment.imageView = imageView;
+    attachment.imageLayout = imageLayout;
+    attachment.loadOp = loadOp;
+    attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachment.clearValue.color = clearValue;
+    return attachment;
+}
+
+/**
+ * Creates a VkRenderingAttachmentInfo structure for depth attachments.
+ * 
+ * @param imageView The image view to attach
+ * @param imageLayout The layout of the image
+ * @param loadOp The load operation to perform
+ * @param clearValue The clear value to use
+ * @return Initialized VkRenderingAttachmentInfo structure
+ */
+VkRenderingAttachmentInfo createDepthAttachmentInfo(VkImageView imageView, VkImageLayout imageLayout, VkAttachmentLoadOp loadOp, const VkClearDepthStencilValue& clearValue)
+{
+    VkRenderingAttachmentInfo attachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
+    attachment.imageView = imageView;
+    attachment.imageLayout = imageLayout;
+    attachment.loadOp = loadOp;
+    attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    attachment.clearValue.depthStencil = clearValue;
+    return attachment;
+}
+
+/**
+ * Creates a VkViewport structure.
+ * 
+ * @param width Viewport width
+ * @param height Viewport height
+ * @return Initialized VkViewport structure
+ */
+VkViewport createViewport(float width, float height)
+{
+    return { 0, height, width, -height, 0, 1 };
+}
+
+/**
+ * Creates a VkRect2D structure for scissor test.
+ * 
+ * @param width Scissor width
+ * @param height Scissor height
+ * @return Initialized VkRect2D structure
+ */
+VkRect2D createScissorRect(uint32_t width, uint32_t height)
+{
+    return { { 0, 0 }, { width, height } };
+}
+
+/**
+ * Creates image barriers for transitioning render targets from undefined to attachment optimal.
+ * 
+ * @param depthImage The depth image to transition
+ * @param colorImages Array of color images to transition
+ * @param colorCount Number of color images
+ * @param barriers Output array to store the barriers (should be large enough for colorCount + 1)
+ */
+void createRenderTargetBarriers(VkImage depthImage, const VkImage* colorImages, uint32_t colorCount, VkImageMemoryBarrier2* barriers)
+{
+    barriers[0] = imageBarrier(depthImage,
+        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+        VK_IMAGE_ASPECT_DEPTH_BIT);
+    
+    for (uint32_t i = 0; i < colorCount; ++i)
+        barriers[i + 1] = imageBarrier(colorImages[i],
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
+}
+
+/**
+ * Calculates the view matrix from camera position and orientation.
+ * 
+ * @param camera The camera with position and orientation
+ * @return The view matrix for rendering
+ */
+mat4 calculateViewMatrix(const Camera& camera)
+{
+    mat4 view = glm::mat4_cast(camera.orientation);
+    view[3] = vec4(camera.position, 1.0f);
+    view = inverse(view);
+    // Flip Z for Vulkan coordinate system
+    return glm::scale(glm::identity<glm::mat4>(), vec3(1, 1, -1)) * view;
+}
+
+/**
+ * Sets up culling data for the renderer based on camera and view parameters.
+ * 
+ * @param view The view matrix
+ * @param projection The projection matrix 
+ * @param camera The camera data
+ * @param drawDistance Maximum render distance
+ * @param drawCount Number of objects to potentially render
+ * @param depthPyramidWidth Width of the depth pyramid texture
+ * @param depthPyramidHeight Height of the depth pyramid texture 
+ * @param screenHeight Screen height for LOD calculations
+ * @return Initialized CullData structure
+ */
+CullData setupCullingData(
+    const mat4& view, 
+    const mat4& projection,
+    const Camera& camera,
+    float drawDistance,
+    uint32_t drawCount,
+    float depthPyramidWidth,
+    float depthPyramidHeight,
+    float screenHeight)
+{
+    mat4 projectionT = transpose(projection);
+    vec4 frustumX = normalizePlane(projectionT[3] + projectionT[0]); // x + w < 0
+    vec4 frustumY = normalizePlane(projectionT[3] + projectionT[1]); // y + w < 0
+    
+    CullData cullData = {};
+    cullData.view = view;
+    cullData.P00 = projection[0][0];
+    cullData.P11 = projection[1][1];
+    cullData.znear = camera.znear;
+    cullData.zfar = drawDistance;
+    cullData.frustum[0] = frustumX.x;
+    cullData.frustum[1] = frustumX.z;
+    cullData.frustum[2] = frustumY.y;
+    cullData.frustum[3] = frustumY.z;
+    cullData.drawCount = drawCount;
+    cullData.cullingEnabled = true;
+    cullData.lodEnabled = true;
+    cullData.occlusionEnabled = true;
+    cullData.lodTarget = (2 / cullData.P11) * (1.f / screenHeight) * (1 << 0); // 1px
+    cullData.pyramidWidth = depthPyramidWidth;
+    cullData.pyramidHeight = depthPyramidHeight;
+    cullData.clusterOcclusionEnabled = true;
+    
+    return cullData;
+}
+
+/**
+ * Clears a buffer using a command buffer and sets up necessary pipeline barriers.
+ * 
+ * @param commandBuffer The command buffer to record commands to
+ * @param buffer The buffer to clear
+ * @param size Size of the data to clear (in bytes)
+ * @param srcStageMask Source pipeline stage mask for the barrier
+ * @param dstStageMask Destination pipeline stage mask for the barrier
+ * @param dstAccessMask Destination access mask for the barrier
+ */
+void clearBuffer(
+    VkCommandBuffer commandBuffer, 
+    VkBuffer buffer, 
+    VkDeviceSize size, 
+    VkPipelineStageFlags2 srcStageMask,
+    VkPipelineStageFlags2 dstStageMask,
+    VkAccessFlags2 dstAccessMask)
+{
+    // Fill the buffer with zeros
+    vkCmdFillBuffer(commandBuffer, buffer, 0, size, 0);
+    
+    // Create and execute barrier to ensure the fill is complete before other operations
+    VkBufferMemoryBarrier2 fillBarrier = bufferBarrier(buffer,
+        VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT,
+        dstStageMask, dstAccessMask);
+    
+    pipelineBarrier(commandBuffer, 0, 1, &fillBarrier, 0, nullptr);
+}
+
+/**
+ * Creates a VkRenderingInfo structure for dynamic rendering.
+ * 
+ * @param width Width of the render area
+ * @param height Height of the render area
+ * @param colorAttachments Array of color attachments
+ * @param colorAttachmentCount Number of color attachments
+ * @param depthAttachment Depth attachment
+ * @return Initialized VkRenderingInfo structure
+ */
+VkRenderingInfo createRenderingInfo(
+    uint32_t width,
+    uint32_t height,
+    const VkRenderingAttachmentInfo* colorAttachments,
+    uint32_t colorAttachmentCount,
+    const VkRenderingAttachmentInfo* depthAttachment)
+{
+    VkRenderingInfo renderInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
+    renderInfo.renderArea.extent.width = width;
+    renderInfo.renderArea.extent.height = height;
+    renderInfo.layerCount = 1;
+    renderInfo.colorAttachmentCount = colorAttachmentCount;
+    renderInfo.pColorAttachments = colorAttachments;
+    renderInfo.pDepthAttachment = depthAttachment;
+    return renderInfo;
+}
+
 Renderer::Renderer()
 {
     m_gfxDevice = initDevice();
@@ -224,26 +429,30 @@ bool Renderer::beginFrame()
 
     if (!m_buffers.m_drawVisibilityCleared)
     {
-        // TODO: this is stupidly redundant
-        vkCmdFillBuffer(m_frames[m_currentFrameIndex].m_commandBuffer, m_buffers.m_drawVisibility.buffer, 0, sizeof(uint32_t) * m_draws.size(), 0);
-
-        VkBufferMemoryBarrier2 fillBarrier = bufferBarrier(m_buffers.m_drawVisibility.buffer,
-            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT,
-            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
-        pipelineBarrier(m_frames[m_currentFrameIndex].m_commandBuffer, 0, 1, &fillBarrier, 0, nullptr);
+        // Use the new free function to clear buffers
+        clearBuffer(
+            m_frames[m_currentFrameIndex].m_commandBuffer,
+            m_buffers.m_drawVisibility.buffer,
+            sizeof(uint32_t) * m_draws.size(),
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+            VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT
+        );
 
         m_buffers.m_drawVisibilityCleared = true;
     }
 
     if (!m_buffers.m_meshletVisibilityCleared)
     {
-        // TODO: this is stupidly redundant
-        vkCmdFillBuffer(m_frames[m_currentFrameIndex].m_commandBuffer, m_buffers.m_meshletVisibility.buffer, 0, m_buffers.m_meshletVisibilityBytes, 0);
-
-        VkBufferMemoryBarrier2 fillBarrier = bufferBarrier(m_buffers.m_meshletVisibility.buffer,
-            VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT,
-            VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT);
-        pipelineBarrier(m_frames[m_currentFrameIndex].m_commandBuffer, 0, 1, &fillBarrier, 0, nullptr);
+        // Use the new free function to clear buffers
+        clearBuffer(
+            m_frames[m_currentFrameIndex].m_commandBuffer,
+            m_buffers.m_meshletVisibility.buffer,
+            m_buffers.m_meshletVisibilityBytes,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT,
+            VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT
+        );
 
         m_buffers.m_meshletVisibilityCleared = true;
     }
@@ -262,36 +471,25 @@ bool Renderer::beginFrame()
     vkCmdWriteTimestamp(m_frames[m_currentFrameIndex].m_commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
 
 
-    m_view = glm::mat4_cast(m_camera.orientation);
-    m_view[3] = vec4(m_camera.position, 1.0f);
-    m_view = inverse(m_view);
-    m_view = glm::scale(glm::identity<glm::mat4>(), vec3(1, 1, -1)) * m_view;
-
+    // Use the new free function to calculate view matrix
+    m_view = calculateViewMatrix(m_camera);
+    
+    // Calculate projection matrix
     m_projection = perspectiveProjection(m_camera.fovY, float(m_gfxDevice.m_swapchain.width) / float(m_gfxDevice.m_swapchain.height), m_camera.znear);
 
     m_projectionT = transpose(m_projection);
 
-    vec4 frustumX = normalizePlane(m_projectionT[3] + m_projectionT[0]); // x + w < 0
-    vec4 frustumY = normalizePlane(m_projectionT[3] + m_projectionT[1]); // y + w < 0
-
-    m_cullData = {};
-    m_cullData.view = m_view;
-    m_cullData.P00 = m_projection[0][0];
-    m_cullData.P11 = m_projection[1][1];
-    m_cullData.znear = m_camera.znear;
-    m_cullData.zfar = m_drawDistance;
-    m_cullData.frustum[0] = frustumX.x;
-    m_cullData.frustum[1] = frustumX.z;
-    m_cullData.frustum[2] = frustumY.y;
-    m_cullData.frustum[3] = frustumY.z;
-    m_cullData.drawCount = uint32_t(m_draws.size());
-    m_cullData.cullingEnabled = true;
-    m_cullData.lodEnabled = true;
-    m_cullData.occlusionEnabled = true;
-    m_cullData.lodTarget = (2 / m_cullData.P11) * (1.f / float(m_gfxDevice.m_swapchain.height)) * (1 << 0); // 1px
-    m_cullData.pyramidWidth = float(m_depthPyramidWidth);
-    m_cullData.pyramidHeight = float(m_depthPyramidHeight);
-    m_cullData.clusterOcclusionEnabled = true;
+    // Use the new free function to set up culling data
+    m_cullData = setupCullingData(
+        m_view,
+        m_projection,
+        m_camera,
+        m_drawDistance,
+        uint32_t(m_draws.size()),
+        float(m_depthPyramidWidth),
+        float(m_depthPyramidHeight),
+        float(m_gfxDevice.m_swapchain.height)
+    );
 
     Globals m_globals = {};
     m_globals.projection = m_projection;
@@ -299,17 +497,16 @@ bool Renderer::beginFrame()
     m_globals.screenWidth = float(m_gfxDevice.m_swapchain.width);
     m_globals.screenHeight = float(m_gfxDevice.m_swapchain.height);
 
-    VkImageMemoryBarrier2 renderBeginBarriers[GBUFFER_COUNT + 1] = {
-        imageBarrier(m_depthTarget.image,
-            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-            VK_IMAGE_ASPECT_DEPTH_BIT),
-    };
+    // Use the new free function to create image barriers for render targets
+    VkImageMemoryBarrier2 renderBeginBarriers[GBUFFER_COUNT + 1];
+    
+    // Prepare color image array for the function
+    VkImage colorImages[GBUFFER_COUNT];
     for (uint32_t i = 0; i < GBUFFER_COUNT; ++i)
-        renderBeginBarriers[i + 1] = imageBarrier(m_gbufferTargets[i].image,
-            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL);
-
+        colorImages[i] = m_gbufferTargets[i].image;
+    
+    createRenderTargetBarriers(m_depthTarget.image, colorImages, GBUFFER_COUNT, renderBeginBarriers);
+    
     pipelineBarrier(m_frames[m_currentFrameIndex].m_commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, COUNTOF(renderBeginBarriers), renderBeginBarriers);
 
     vkCmdResetQueryPool(m_frames[m_currentFrameIndex].m_commandBuffer, m_queryPoolPipeline, 0, 4);
@@ -362,28 +559,6 @@ void Renderer::drawCull(VkPipeline pipeline, uint32_t timestamp, const char *pha
         DescriptorInfo pyramidDesc(m_samplers.m_depthSampler, m_depthPyramid.imageView, VK_IMAGE_LAYOUT_GENERAL);
         DescriptorInfo descriptors[] = { m_buffers.m_draw.buffer, m_buffers.m_meshesh.buffer, m_buffers.m_taskCommands.buffer, m_buffers.m_commandCount.buffer, m_buffers.m_drawVisibility.buffer, pyramidDesc };
 
-        // printf("passData \n");
-        // printf("passData.P00 %f \n", passData.P00);
-        // printf("passData.P11 %f \n", passData.P11);
-        // printf("passData.znear %f \n", passData.znear);
-        // printf("passData.zfar %f \n", passData.zfar);
-
-        // printf("passData.frustum[0] %f \n", passData.frustum[0]);
-        // printf("passData.frustum[1] %f \n", passData.frustum[1]);
-        // printf("passData.frustum[2] %f \n", passData.frustum[2]);
-        // printf("passData.frustum[2] %f \n", passData.frustum[3]);
-
-        // printf("passData.lodTarget %f \n", passData.lodTarget);
-        // printf("passData.pyramidWidth %f \n", passData.pyramidWidth);
-        // printf("passData.pyramidHeight %f \n", passData.pyramidHeight);
-        // printf("passData.drawCount %ld \n", passData.drawCount);
-        // printf("passData.cullingEnabled %i \n", passData.cullingEnabled);
-        // printf("passData.lodEnabled %i \n", passData.lodEnabled);
-        // printf("passData.occlusionEnabled %i \n", passData.occlusionEnabled);
-        // printf("passData.clusterOcclusionEnabled %i \n", passData.clusterOcclusionEnabled);
-        // printf("passData.clusterBackfaceEnabled %i \n", passData.clusterBackfaceEnabled);
-        // printf("passData.postPass %d \n", passData.postPass);
-
         printf("dispatch %lu \n", m_draws.size());
         dispatch(commandBuffer, m_programs.m_drawcullProgram, uint32_t(m_draws.size()), 1, passData, descriptors);
         printf("dispatch completed \n");
@@ -427,36 +602,39 @@ void Renderer::drawRender(bool late, const VkClearColorValue &colorClear, const 
 
     vkCmdBeginQuery(commandBuffer, m_queryPoolPipeline, query, 0);
 
-    VkRenderingAttachmentInfo gbufferAttachments[GBUFFER_COUNT] = {};
+    // Use the new free functions to create attachments
+    VkRenderingAttachmentInfo gbufferAttachments[GBUFFER_COUNT];
     for (uint32_t i = 0; i < GBUFFER_COUNT; ++i)
     {
-        gbufferAttachments[i].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-        gbufferAttachments[i].imageView = m_gbufferTargets[i].imageView;
-        gbufferAttachments[i].imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-        gbufferAttachments[i].loadOp = late ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_CLEAR;
-        gbufferAttachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        gbufferAttachments[i].clearValue.color = colorClear;
+        gbufferAttachments[i] = createColorAttachmentInfo(
+            m_gbufferTargets[i].imageView,
+            VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+            late ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_CLEAR,
+            colorClear
+        );
     }
 
-    VkRenderingAttachmentInfo depthAttachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-    depthAttachment.imageView = m_depthTarget.imageView;
-    depthAttachment.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
-    depthAttachment.loadOp = late ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    depthAttachment.clearValue.depthStencil = depthClear;
+    VkRenderingAttachmentInfo depthAttachment = createDepthAttachmentInfo(
+        m_depthTarget.imageView,
+        VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
+        late ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_CLEAR,
+        depthClear
+    );
 
-    VkRenderingInfo passInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
-    passInfo.renderArea.extent.width = m_gfxDevice.m_swapchain.width;
-    passInfo.renderArea.extent.height = m_gfxDevice.m_swapchain.height;
-    passInfo.layerCount = 1;
-    passInfo.colorAttachmentCount = GBUFFER_COUNT;
-    passInfo.pColorAttachments = gbufferAttachments;
-    passInfo.pDepthAttachment = &depthAttachment;
+    // Use the new free function for creating render info
+    VkRenderingInfo passInfo = createRenderingInfo(
+        m_gfxDevice.m_swapchain.width,
+        m_gfxDevice.m_swapchain.height,
+        gbufferAttachments,
+        GBUFFER_COUNT,
+        &depthAttachment
+    );
 
     vkCmdBeginRendering(commandBuffer, &passInfo);
 
-    VkViewport viewport = { 0, float(m_gfxDevice.m_swapchain.height), float(m_gfxDevice.m_swapchain.width), -float(m_gfxDevice.m_swapchain.height), 0, 1 };
-    VkRect2D scissor = { { 0, 0 }, { uint32_t(m_gfxDevice.m_swapchain.width), uint32_t(m_gfxDevice.m_swapchain.height) } };
+    // Use the new free functions for viewport and scissor
+    VkViewport viewport = createViewport(float(m_gfxDevice.m_swapchain.width), float(m_gfxDevice.m_swapchain.height));
+    VkRect2D scissor = createScissorRect(uint32_t(m_gfxDevice.m_swapchain.width), uint32_t(m_gfxDevice.m_swapchain.height));
 
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
@@ -484,7 +662,6 @@ void Renderer::drawRender(bool late, const VkClearColorValue &colorClear, const 
     vkCmdEndQuery(commandBuffer, m_queryPoolPipeline, query);
 
     vkCmdWriteTimestamp(commandBuffer, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, m_queryPoolTimestamp, timestamp + 1);
-
 }
 
 void Renderer::drawPyramid(uint32_t timestamp)
@@ -542,79 +719,6 @@ void Renderer::drawPyramid(uint32_t timestamp)
 
 void Renderer::drawDebug()
 {
-    // auto commandBuffer = m_frames[m_frameIndex % FRAMES_COUNT].commandBuffer;
-
-    // auto debugtext = [&](int line, uint32_t color, const char* format, ...)
-    // #ifdef __GNUC__
-    //                                  __attribute__((format(printf, 4, 5)))
-    // #endif
-    // {
-    //     TextData textData = {};
-    //     textData.offsetX = 1;
-    //     textData.offsetY = line + 1;
-    //     textData.scale = 2;
-    //     textData.color = color;
-
-    //     va_list args;
-    //     va_start(args, format);
-    //     vsnprintf(textData.data, sizeof(textData.data), format, args);
-    //     va_end(args);
-
-    //     vkCmdPushConstants(commandBuffer, m_programs.debugtextProgram.layout, m_programs.debugtextProgram.pushConstantStages, 0, sizeof(textData), &textData);
-    //     vkCmdDispatch(commandBuffer, strlen(textData.data), 1, 1);
-    // };
-
-    // VkImageMemoryBarrier2 textBarrier =
-    //     imageBarrier(m_gfxDevice.m_swapchain.images[m_imageIndex],
-    //         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
-    //         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL);
-
-    // pipelineBarrier(commandBuffer, VK_DEPENDENCY_BY_REGION_BIT, 0, nullptr, 1, &textBarrier);
-
-    // vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipelines.debugtextPipeline);
-
-    // DescriptorInfo descriptors[] = { { m_gfxDevice.m_swapchainImageViews[m_imageIndex], VK_IMAGE_LAYOUT_GENERAL } };
-    // vkCmdPushDescriptorSetWithTemplate(commandBuffer, m_programs.debugtextProgram.updateTemplate, m_programs.debugtextProgram.layout, 0, descriptors);
-
-    // // debug text goes here!
-    // uint64_t triangleCount = m_pipelineResults[0] + m_pipelineResults[1] + m_pipelineResults[2];
-
-    // double frameGpuBegin = double(m_timestampResults[0]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double frameGpuEnd = double(m_timestampResults[1]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-
-    // double cullGpuTime = double(m_timestampResults[3] - m_timestampResults[2]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double renderGpuTime = double(m_timestampResults[5] - m_timestampResults[4]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double pyramidGpuTime = double(m_timestampResults[7] - m_timestampResults[6]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double culllateGpuTime = double(m_timestampResults[9] - m_timestampResults[8]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double renderlateGpuTime = double(m_timestampResults[11] - m_timestampResults[10]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double cullpostGpuTime = double(m_timestampResults[13] - m_timestampResults[12]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double renderpostGpuTime = double(m_timestampResults[15] - m_timestampResults[14]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double shadowsGpuTime = double(m_timestampResults[17] - m_timestampResults[16]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double shadowblurGpuTime = double(m_timestampResults[18] - m_timestampResults[17]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double shadeGpuTime = double(m_timestampResults[20] - m_timestampResults[19]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-    // double tlasGpuTime = double(m_timestampResults[22] - m_timestampResults[21]) * m_gfxDevice.m_props.limits.timestampPeriod * 1e-6;
-
-    // double trianglesPerSec = double(triangleCount) / double(m_frameGpuAvg * 1e-3);
-    // double drawsPerSec = double(m_draws.size()) / double(m_frameGpuAvg * 1e-3);
-
-    // debugtext(0, ~0u, "cpu: %.2f ms (%d); gpu: %.2f ms", m_frameGpuAvg, m_frames[m_lastFrameIndex].deltaTime, m_frameGpuAvg);
-
-    // debugtext(2, ~0u, "cull: %.2f ms, pyramid: %.2f ms, render: %.2f ms, final: %.2f ms",
-    //     cullGpuTime + culllateGpuTime + cullpostGpuTime,
-    //     pyramidGpuTime,
-    //     renderGpuTime + renderlateGpuTime + renderpostGpuTime,
-    //     shadeGpuTime);
-    // debugtext(3, ~0u, "tlas: %.2f ms, shadows: %.2f ms, shadow blur: %.2f ms",
-    //     tlasGpuTime,
-    //     shadowsGpuTime, shadowblurGpuTime);
-    // debugtext(4, ~0u, "triangles %.2fM; %.1fB tri / sec, %.1fM draws / sec",
-    //     double(triangleCount) * 1e-6, trianglesPerSec * 1e-9, drawsPerSec * 1e-6);
-
-    // debugtext(9, ~0u, "RT shadows: %s, blur %s, quality %d, checkerboard %s",
-    //     raytracingSupported && shadowsEnabled ? "ON" : "OFF",
-    //     raytracingSupported && shadowblurEnabled ? "ON" : "OFF",
-    //     shadowQuality, shadowCheckerboard ? "ON" : "OFF");
-    
 }
 
 void Renderer::drawShadow()
@@ -806,10 +910,6 @@ bool Renderer::loadGLTFScene(std::string filename)
 			printf("Error: image N: %ld %s failed to load\n", i, m_texturePaths[i].c_str());
 			return 1;
 		}
-
-		// VkMemoryRequirements memoryRequirements = {};
-		// vkGetImageMemoryRequirements(m_gfxDevice.m_device, image.image, &memoryRequirements);
-		// m_imageMemory += memoryRequirements.size;
 
 		m_images.push_back(image);
 	}
