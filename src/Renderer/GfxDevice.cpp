@@ -95,7 +95,6 @@ GfxDevice initDevice()
 
 	printf("Registering debug callback\n");
 	result.m_debugCallback = registerDebugCallback(result.m_instance);
-	registerDebugCallback(result.m_instance);
 	VkPhysicalDevice physicalDevices[16];
 	uint32_t physicalDeviceCount = sizeof(physicalDevices) / sizeof(physicalDevices[0]);
 	VK_CHECK(vkEnumeratePhysicalDevices(result.m_instance, &physicalDeviceCount, physicalDevices));

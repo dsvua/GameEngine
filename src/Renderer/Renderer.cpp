@@ -558,6 +558,8 @@ void Renderer::draw()
     // Update camera based on keyboard input
     float deltaTimeSeconds = m_frames[m_currentFrameIndex].m_deltaTime / 1000.0f;
     m_camera.update(deltaTimeSeconds);
+
+    
     printf("drawCull \n");
     drawCull(m_pipelines.m_taskcullPipeline, 2, "early cull", /* late= */ false);
     // drawCull(m_pipelines.drawcullPipeline, 2, "early cull", /* late= */ false);
@@ -821,7 +823,21 @@ bool Renderer::loadGLTFScene(std::string filename)
 
 void Renderer::cleanup()
 {
-    printf("Doing clenup of resources created by renderer\n");
+    printf("Doing cleanup of resources created by renderer\n");
+    
+    // Make sure we finish all pending work before destroying resources
+    VK_CHECK(vkDeviceWaitIdle(m_gfxDevice.m_device));
+    
+    // Wait for all frames to complete
+    for (int i = 0; i < FRAMES_COUNT; i++)
+    {
+        if (m_frames[i].m_renderFence)
+        {
+            VK_CHECK(vkWaitForFences(m_gfxDevice.m_device, 1, &m_frames[i].m_renderFence, VK_TRUE, UINT64_MAX));
+        }
+    }
+    
+    // Destroy descriptor pool after commands are completed
     vkDestroyDescriptorPool(m_gfxDevice.m_device, m_textureSet.first, 0);
 
 	for (Image& image : m_images)
@@ -870,9 +886,15 @@ void Renderer::cleanup()
     for (VkAccelerationStructureKHR as : m_blas)
         vkDestroyAccelerationStructureKHR(m_gfxDevice.m_device, as, 0);
 
+    // Command pools should be destroyed after waiting for their command buffers to complete
     for (int i=0; i<FRAMES_COUNT; i++)
     {
         vkDestroyCommandPool(m_gfxDevice.m_device, m_frames[i].m_commandPool, 0);
+    }
+    
+    // Destroy immediate command pool after use
+    if (m_immCommandPool) {
+        vkDestroyCommandPool(m_gfxDevice.m_device, m_immCommandPool, 0);
     }
 
 	vkDestroyQueryPool(m_gfxDevice.m_device, m_queryPoolTimestamp, 0);
@@ -915,9 +937,13 @@ void Renderer::cleanup()
 
 	vkDestroySurfaceKHR(m_gfxDevice.m_instance, m_gfxDevice.m_surface, 0);
 
+	// Destroy debug callback before destroying the instance
+	if (m_gfxDevice.m_debugCallback) {
+		vkDestroyDebugReportCallbackEXT(m_gfxDevice.m_instance, m_gfxDevice.m_debugCallback, 0);
+		m_gfxDevice.m_debugCallback = VK_NULL_HANDLE;
+	}
 
 	vkDestroyDevice(m_gfxDevice.m_device, 0);
-
 	vkDestroyInstance(m_gfxDevice.m_instance, 0);
 
 	volkFinalize();
